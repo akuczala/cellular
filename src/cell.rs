@@ -1,5 +1,8 @@
+use crate::grid::grid_view::GridView;
+
 const BIRTH_RULE: [bool; 9] = [false, false, false, true, false, false, false, false, false];
 const SURVIVE_RULE: [bool; 9] = [false, false, true, true, false, false, false, false, false];
+const NEIGHBOR_OFFSETS: [[i32; 2]; 8] = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Cell {
@@ -17,7 +20,8 @@ impl Cell {
     }
 
     #[must_use]
-    pub fn update_neibs(self, n: usize) -> Self {
+    pub fn update(self, grid_view: GridView) -> Self {
+        let n = Cell::count_neibs(grid_view);
         let next_alive = if self.alive {
             SURVIVE_RULE[n]
         } else {
@@ -25,9 +29,15 @@ impl Cell {
         };
         self.next_state(next_alive)
     }
+    fn count_neibs(grid_view: GridView) -> usize {
+        NEIGHBOR_OFFSETS
+            .iter()
+            .map(|dxy| { grid_view.get_cell_at(dxy[0], dxy[1]).alive as usize })
+            .sum()
+    }
 
     #[must_use]
-    pub fn next_state(mut self, alive: bool) -> Self {
+    fn next_state(mut self, alive: bool) -> Self {
         self.alive = alive;
         if self.alive {
             self.heat = 255;

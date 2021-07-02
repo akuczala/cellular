@@ -1,11 +1,17 @@
+use grid_view::GridView;
+
 use crate::cell::Cell;
 use crate::util::modulo;
+use crate::grid::grid_pos::{GridInt, GridPos};
+
+pub mod grid_pos;
+pub mod grid_view;
 
 
 const INITIAL_FILL: f32 = 0.3;
-const NEIGHBOR_OFFSETS: [[i32; 2]; 8] = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+
 #[derive(Clone, Debug)]
-pub(crate) struct ConwayGrid {
+pub struct ConwayGrid {
     cells: Vec<Cell>,
     width: usize,
     height: usize,
@@ -49,24 +55,19 @@ impl ConwayGrid {
             c.cool_off(0.4);
         }
     }
-    fn get_cell_at(&self, x: i32, y: i32) -> &Cell {
-        let (width, height) = (self.width as i32, self.height as i32);
+    pub(crate) fn get_cell_at(&self, x: GridInt, y: GridInt) -> &Cell {
+        let (width, height) = (self.width as GridInt, self.height as GridInt);
         let cell_idx = modulo(x, width) + modulo(y, height) * width;
         &self.cells[cell_idx as usize]
     }
-    fn count_neibs(&self, ux: usize, uy: usize) -> usize {
-        let (x, y) = (ux as i32, uy as i32);
-        NEIGHBOR_OFFSETS
-            .iter()
-            .map(|dxy| { self.get_cell_at(x + dxy[0], y + dxy[1]).alive as usize })
-            .sum()
-    }
+
     pub(crate) fn update(&mut self) {
         for y in 0..self.height {
             for x in 0..self.width {
-                let neibs = self.count_neibs(x, y);
                 let idx = x + y * self.width;
-                let next = self.cells[idx].update_neibs(neibs);
+                let grid_pos = GridPos::new(x as GridInt, y as GridInt);
+                let grid_view = GridView::new(grid_pos, &self);
+                let next = self.cells[idx].update(grid_view);
                 // Write into scratch_cells, since we're still reading from `self.cells`
                 self.scratch_cells[idx] = next;
             }
