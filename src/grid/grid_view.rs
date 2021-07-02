@@ -1,16 +1,16 @@
-use crate::grid::ConwayGrid;
-use crate::cell::Cell;
+use crate::grid::Grid;
 use crate::grid::grid_pos::{GridPos, GridInt};
+use crate::cell::Cell;
 
-pub struct GridView<'a> {
+pub struct GridView<'a, C: Cell> {
     origin: GridPos,
-    grid: &'a ConwayGrid
+    grid: &'a Grid<C>
 }
-impl<'a> GridView<'a> {
-    pub fn new(origin: GridPos, grid: &ConwayGrid) -> GridView {
+impl<'a, C: Cell> GridView<'a, C> {
+    pub fn new(origin: GridPos, grid: &Grid<C>) -> GridView<C> {
         GridView{origin, grid}
     }
-    pub fn get_cell_at(&self, x: GridInt, y: GridInt) -> &Cell {
+    pub fn get_cell_at(&self, x: GridInt, y: GridInt) -> &C {
         self.grid.get_cell_at(self.origin.x() + x, self.origin.y() + y)
     }
 }

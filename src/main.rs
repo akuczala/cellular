@@ -9,13 +9,15 @@ use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit_input_helper::WinitInputHelper;
 
-use crate::grid::ConwayGrid;
+use crate::grid::Grid;
 use crate::window::{create_window, SCREEN_HEIGHT, SCREEN_WIDTH};
+use crate::conway_cell::ConwayCell;
 
-mod cell;
+mod conway_cell;
 mod grid;
 mod window;
 mod util;
+mod cell;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
@@ -26,7 +28,9 @@ fn main() -> Result<(), Error> {
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
 
-    let mut life = ConwayGrid::new_random(SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize);
+    let mut life = Grid::<ConwayCell>::new_random(
+        SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize
+    );
     let mut pixels = Pixels::new(SCREEN_WIDTH, SCREEN_HEIGHT, surface_texture)?;
     let mut paused = false;
 
