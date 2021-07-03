@@ -1,10 +1,10 @@
 use crate::grid::grid_view::GridView;
 use crate::util::{RandomGenerator, Color};
 use crate::cell::Cell;
+use crate::util::NEAREST_NEIGHBORS;
 
 const BIRTH_RULE: [bool; 9] = [false, false, false, true, false, false, false, false, false];
 const SURVIVE_RULE: [bool; 9] = [false, false, true, true, false, false, false, false, false];
-const NEIGHBOR_OFFSETS: [[i32; 2]; 8] = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
 
 const INITIAL_FILL: f32 = 0.3;
 
@@ -23,9 +23,9 @@ impl ConwayCell {
         Self { alive, heat: 0 }
     }
     fn count_neibs(grid_view: GridView<Self>) -> usize {
-        NEIGHBOR_OFFSETS
+        NEAREST_NEIGHBORS
             .iter()
-            .map(|dxy| { grid_view.get_cell_at(dxy[0], dxy[1]).alive as usize })
+            .map(|dxy| { grid_view.get_cell_at_coord(dxy[0], dxy[1]).alive as usize })
             .sum()
     }
     fn set_alive(&mut self, alive: bool) {
@@ -64,10 +64,9 @@ impl Cell for ConwayCell {
         }
     }
 
-    fn toggle(&mut self) -> bool {
+    fn toggle(&mut self) {
         let was_alive = self.alive;
         self.set_alive(!was_alive);
-        !was_alive
     }
 
     fn line_action(&mut self, alive: bool) {

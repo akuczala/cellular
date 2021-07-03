@@ -3,15 +3,18 @@ use grid_view::GridView;
 use crate::util::{modulo, generate_seed};
 use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::cell::Cell;
+pub use crate::grid::boundary::Boundary;
 
 pub mod grid_pos;
 pub mod grid_view;
+mod boundary;
 
 #[derive(Clone, Debug)]
 pub struct Grid<C: Cell> {
     cells: Vec<C>,
     width: usize,
     height: usize,
+    boundary: Boundary<C>,
     // Should always be the same size as `cells`. When updating, we read from
     // `cells` and write to `scratch_cells`, then swap. Otherwise it's not in
     // use, and `cells` should be updated directly.
@@ -19,7 +22,7 @@ pub struct Grid<C: Cell> {
 }
 
 impl<C: Cell> Grid<C> {
-    fn new_empty(width: usize, height: usize) -> Self {
+    fn new_empty(width: usize, height: usize, boundary: Boundary<C>) -> Self {
         assert!(width != 0 && height != 0);
         let size = width.checked_mul(height).expect("too big");
         Self {
@@ -27,11 +30,12 @@ impl<C: Cell> Grid<C> {
             scratch_cells: vec![C::default(); size],
             width,
             height,
+            boundary,
         }
     }
 
-    pub fn new_random(width: usize, height: usize) -> Self {
-        let mut result = Self::new_empty(width, height);
+    pub fn new_random(width: usize, height: usize, boundary: Boundary<C>) -> Self {
+        let mut result = Self::new_empty(width, height, boundary);
         result.randomize();
         result
     }
@@ -49,8 +53,21 @@ impl<C: Cell> Grid<C> {
     }
     pub fn get_cell_at(&self, x: GridInt, y: GridInt) -> &C {
         let (width, height) = (self.width as GridInt, self.height as GridInt);
-        let cell_idx = modulo(x, width) + modulo(y, height) * width;
-        &self.cells[cell_idx as usize]
+        match &self.boundary {
+            Boundary::Periodic => {
+                let cell_idx = modulo(x, width) + modulo(y, height) * width;
+                &self.cells[cell_idx as usize]
+            }
+            Boundary::Constant(cell) => {
+                if (0 <= x) & (x < width) & (0 <= y) & (y < height) {
+                    let cell_idx = x + y * width;
+                    &self.cells[cell_idx as usize]
+                } else {
+                    &cell
+                }
+            }
+        }
+
     }
 
     pub fn update(&mut self) {
@@ -68,10 +85,12 @@ impl<C: Cell> Grid<C> {
     }
 
     pub fn toggle(&mut self, x: isize, y: isize) -> bool {
-        if let Some(i) = self.grid_idx(x, y, false) {
-            self.cells[i].toggle()
-        } else {
-            false
+        match self.grid_idx(x, y, false) {
+            Some(i) => {
+                self.cells[i].toggle();
+                true
+            }
+            None => false
         }
     }
 
@@ -99,22 +118,17 @@ impl<C: Cell> Grid<C> {
     fn line_action(cell: &mut C, alive: bool) {
         cell.line_action(alive)
     }
-    // todo make this work for int properly
-    fn grid_idx<I: std::convert::TryInto<usize>>(&self, x: I, y: I, periodic: bool) -> Option<usize> {
-        if let (Ok(x), Ok(y)) = (x.try_into(), y.try_into()) {
-            match periodic {
-                true => Some((x % self.width) + (y % self.height) * self.width),
-                false => {
-                    if x < self.width && y < self.height {
-                        Some(x + y * self.width)
-                    } else {
-                        None
-                    }
+    fn grid_idx<>(&self, x: isize, y: isize, periodic: bool) -> Option<usize> {
+        let (x, y) = (x as usize, y as usize);
+        match self.boundary {
+            Boundary::Periodic => Some((x % self.width) + (y % self.height) * self.width),
+            Boundary::Constant(_) => {
+                if x < self.width && y < self.height {
+                    Some(x + y * self.width)
+                } else {
+                    None
                 }
             }
-
-        } else {
-            None
         }
     }
 }

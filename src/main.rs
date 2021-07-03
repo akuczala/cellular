@@ -9,27 +9,29 @@ use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit_input_helper::WinitInputHelper;
 
-use crate::grid::Grid;
+use crate::grid::{Grid, Boundary};
 use crate::window::{create_window, SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::conway_cell::ConwayCell;
+use crate::cell_library::{DiffusionCell, ComplexDiffusionCell};
 
-mod conway_cell;
 mod grid;
 mod window;
 mod util;
 mod cell;
+mod cell_library;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
     let (window, p_width, p_height, mut _hidpi_factor) =
-        create_window("Conway's Game of Life", &event_loop);
+        create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
 
-    let mut life = Grid::<ConwayCell>::new_random(
-        SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize
+    let mut grid = Grid::<DiffusionCell>::new_random(
+        SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize,
+        Boundary::Periodic
+
     );
     let mut pixels = Pixels::new(SCREEN_WIDTH, SCREEN_HEIGHT, surface_texture)?;
     let mut paused = false;
@@ -39,7 +41,7 @@ fn main() -> Result<(), Error> {
     event_loop.run(move |event, _, control_flow| {
         // The one and only event that winit_input_helper doesn't have for us...
         if let Event::RedrawRequested(_) = event {
-            life.draw(pixels.get_frame());
+            grid.draw(pixels.get_frame());
             if pixels
                 .render()
                 .map_err(|e| error!("pixels.render() failed: {}", e))
@@ -66,7 +68,7 @@ fn main() -> Result<(), Error> {
                 paused = true;
             }
             if input.key_pressed(VirtualKeyCode::R) {
-                life.randomize();
+                grid.randomize();
             }
             // Handle mouse. This is a bit involved since support some simple
             // line drawing (mostly because it makes nice looking patterns).
@@ -94,7 +96,7 @@ fn main() -> Result<(), Error> {
 
             if input.mouse_pressed(0) {
                 debug!("Mouse click at {:?}", mouse_cell);
-                draw_state = Some(life.toggle(mouse_cell.0, mouse_cell.1));
+                draw_state = Some(grid.toggle(mouse_cell.0, mouse_cell.1));
             } else if let Some(draw_alive) = draw_state {
                 let release = input.mouse_released(0);
                 let held = input.mouse_held(0);
@@ -104,7 +106,7 @@ fn main() -> Result<(), Error> {
                 // in the middle of drawing, keep going.
                 if release || held {
                     debug!("Draw line of {:?}", draw_alive);
-                    life.set_line(
+                    grid.set_line(
                         mouse_prev_cell.0,
                         mouse_prev_cell.1,
                         mouse_cell.0,
@@ -127,7 +129,7 @@ fn main() -> Result<(), Error> {
                 pixels.resize_surface(size.width, size.height);
             }
             if !paused || input.key_pressed(VirtualKeyCode::Space) {
-                life.update();
+                grid.update();
             }
             window.request_redraw();
         }

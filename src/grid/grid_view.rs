@@ -10,7 +10,10 @@ impl<'a, C: Cell> GridView<'a, C> {
     pub fn new(origin: GridPos, grid: &Grid<C>) -> GridView<C> {
         GridView{origin, grid}
     }
-    pub fn get_cell_at(&self, x: GridInt, y: GridInt) -> &C {
+    pub fn get_cell_at_coord(&self, x: GridInt, y: GridInt) -> &C {
         self.grid.get_cell_at(self.origin.x() + x, self.origin.y() + y)
+    }
+    pub fn get_cell_at(&self, pos: GridPos) -> &C {
+        self.get_cell_at_coord(pos.x(), pos.y())
     }
 }
