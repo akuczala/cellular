@@ -9,15 +9,21 @@ use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit_input_helper::WinitInputHelper;
 
-use crate::grid::{Grid, Boundary};
-use crate::window::{create_window, SCREEN_HEIGHT, SCREEN_WIDTH};
-use crate::cell_library::{DiffusionCell, ComplexDiffusionCell};
+use crate::grid::Grid;
+use crate::window::create_window;
+use crate::cell_library::*;
+use num_complex::Complex32;
+use crate::grid::boundary::{ConstantBoundary, Boundary, FreeBoundary, PeriodicBoundary};
 
 mod grid;
 mod window;
 mod util;
 mod cell;
 mod cell_library;
+
+pub const GRID_WIDTH: u32 = 100;
+pub const GRID_HEIGHT: u32 = 100;
+pub const PER_FRAME_UPDATES: u32 = 10;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
@@ -27,13 +33,12 @@ fn main() -> Result<(), Error> {
         create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-
-    let mut grid = Grid::<DiffusionCell>::new_random(
-        SCREEN_WIDTH as usize, SCREEN_HEIGHT as usize,
-        Boundary::Periodic
+    let mut grid = Grid::<XYModelCell>::new_random(
+        GRID_WIDTH as usize, GRID_HEIGHT as usize,
+        PeriodicBoundary.into()
 
     );
-    let mut pixels = Pixels::new(SCREEN_WIDTH, SCREEN_HEIGHT, surface_texture)?;
+    let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;
     let mut paused = false;
 
     let mut draw_state: Option<bool> = None;
@@ -69,6 +74,15 @@ fn main() -> Result<(), Error> {
             }
             if input.key_pressed(VirtualKeyCode::R) {
                 grid.randomize();
+            }
+            if input.key_pressed(VirtualKeyCode::A) {
+                // let density_sum: f64 = grid.cells.iter()
+                //     .map(|c| c.density.norm_sqr())
+                //     .sum::<f64>();
+                // println!("{:?}", density_sum);
+            }
+            if input.key_pressed(VirtualKeyCode::C) {
+                grid.clear();
             }
             // Handle mouse. This is a bit involved since support some simple
             // line drawing (mostly because it makes nice looking patterns).
@@ -129,7 +143,9 @@ fn main() -> Result<(), Error> {
                 pixels.resize_surface(size.width, size.height);
             }
             if !paused || input.key_pressed(VirtualKeyCode::Space) {
-                grid.update();
+                for _ in 0..PER_FRAME_UPDATES {
+                    grid.update();
+                }
             }
             window.request_redraw();
         }

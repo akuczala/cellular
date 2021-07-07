@@ -1,20 +1,23 @@
-use num_complex::Complex32;
+use num_complex::{Complex32, Complex64};
 use crate::cell::Cell;
 use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, complex_to_hue, SECOND_ORDER_CENTRAL, stencil_coords};
 use crate::grid::grid_view::GridView;
 use palette::{Hsv, LinSrgb, Pixel};
 use std::f32::consts::PI;
+use crate::grid::grid_pos::GridPos;
 
-type Density = Complex32;
-type Float = f32;
-const MAX_ABS: f32 = 1.0;
-const DIFFUSION_CONSTANT: Float = 0.01;
+type Density = Complex64;
+type Float = f64;
+const MAX_ABS: Float = 1.0;
 
 #[derive(Default,Clone)]
 pub struct ComplexDiffusionCell {
     pub(crate) density: Density
 }
 impl ComplexDiffusionCell {
+    fn diffusion_constant() -> Density {
+        0.001*Density::i()
+    }
     fn avg_neighbors(grid_view: GridView<Self>) -> Density {
         NEAREST_NEIGHBORS
             .iter()
@@ -22,25 +25,32 @@ impl ComplexDiffusionCell {
             .sum::<Density>() / (N_NEAREST_NEIGHBORS as Float)
     }
     fn laplace(grid_view: GridView<Self>) -> Density {
-        let laplacian: Density = SECOND_ORDER_CENTRAL.iter()
+        SECOND_ORDER_CENTRAL.iter()
             .flatten()
             .zip(stencil_coords(3, 3))
-            .map(|(weight, dpos)| weight * grid_view.get_cell_at(dpos).density)
-            .sum();
-        laplacian*DIFFUSION_CONSTANT / Density::i() + grid_view.get_cell_at_coord(0, 0).density * (1.0 - DIFFUSION_CONSTANT)
+            .map(|(&weight, dpos)| (weight as Float) * grid_view.get_cell_at(dpos).density)
+            .sum()
     }
 }
 
 impl Cell for ComplexDiffusionCell {
-    fn random(rng: &mut RandomGenerator) -> Self {
-        let radius = randomize::f32_half_open_right(rng.next_u32());
-        let theta = randomize::f32_half_open_right(rng.next_u32()) * 2.0 * PI;
-        Self{density: Density::from_polar(radius, theta)}
+    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+        let radius = if (grid_pos.x() > 50) & (grid_pos.y() > 50) {
+            //randomize::f32_half_open_right(rng.next_u32()) * 1.0
+            1.0
+        } else {
+            0.0
+        };
+        let radius = Float::sin(2.0*std::f64::consts::PI*(grid_pos.x() as Float)/100.0);
+        let radius = radius * Float::sin(2.0*std::f64::consts::PI*(grid_pos.y() as Float)/100.0);
+        //let theta = randomize::f32_half_open_right(rng.next_u32()) * 2.0 * PI;
+        let theta = 0.0;
+        Self{density: Density::from_polar(radius as Float, theta as Float)}
     }
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
-        let new_density: Density = Self::laplace(grid_view);
-        let new_density = new_density / new_density.norm().clamp(MAX_ABS, Float::INFINITY);
+        let new_density: Density = Self::laplace(grid_view)*Self::diffusion_constant()
+            + self.density;
         Self{density: new_density}
     }
 

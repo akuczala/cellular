@@ -1,11 +1,12 @@
 use crate::cell::Cell;
 use crate::grid::grid_view::GridView;
 use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, SECOND_ORDER_CENTRAL, stencil_coords, map_to_unit_interval};
+use crate::grid::grid_pos::GridPos;
 
 type Density = f32;
 const MIN_VISIBLE_DENSITY: Density = 0.0;
 const MAX_VISIBLE_DENSITY: Density = 1.0;
-const DIFFUSION_CONSTANT: Density = 0.001;
+const DIFFUSION_CONSTANT: Density = 0.01;
 
 #[derive(Clone,Default)]
 pub struct DiffusionCell {
@@ -19,21 +20,25 @@ impl DiffusionCell {
             .sum::<Density>() / (N_NEAREST_NEIGHBORS as Density)
     }
     fn laplace(grid_view: GridView<Self>) -> Density {
-        let laplacian: Density = SECOND_ORDER_CENTRAL.iter()
+        SECOND_ORDER_CENTRAL.iter()
             .flatten()
             .zip(stencil_coords(3, 3))
             .map(|(weight, dpos)| weight * grid_view.get_cell_at(dpos).density)
-            .sum();
-        laplacian*DIFFUSION_CONSTANT + grid_view.get_cell_at_coord(0, 0).density * (1.0 - DIFFUSION_CONSTANT)
+            .sum()
     }
 }
 impl Cell for DiffusionCell {
-    fn random(rng: &mut RandomGenerator) -> Self {
-        Self{density: randomize::f32_half_open_right(rng.next_u32())}
+    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+        let density = if grid_pos.x() > 50 {
+            randomize::f32_half_open_right(rng.next_u32()) * 1.0
+        } else {
+            0.0
+        };
+        Self{density}
     }
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
-        let new_density: Density = Self::laplace(grid_view) ;
+        let new_density: Density = Self::laplace(grid_view)*DIFFUSION_CONSTANT + self.density ;
         Self{density: new_density}
     }
 

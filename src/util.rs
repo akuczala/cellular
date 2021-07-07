@@ -1,7 +1,8 @@
 use crate::grid::grid_pos::{GridInt, GridPos};
 use std::ops::Range;
 use std::f32::consts::PI;
-use num_complex::Complex32;
+use num_complex::{Complex32, Complex};
+use num_traits::{Float, NumCast, Num};
 
 pub const NEAREST_NEIGHBORS: [[i32; 2]; 8] = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
 pub const N_NEAREST_NEIGHBORS: u8 = 8;
@@ -22,10 +23,10 @@ pub fn stencil_coords(width: GridInt, height: GridInt) -> impl Iterator<Item=Gri
         .map(move |dx| GridPos::new(dx, dy))
     ).flatten()
 }
-pub fn modulo(lhs: i32, rhs: i32) -> i32 {
+pub fn modulo<I: Num + Copy + std::cmp::PartialOrd>(lhs: I, rhs: I) -> I {
     let r = lhs % rhs;
-    if r < 0 {
-        return if rhs > 0 { r + rhs } else { r - rhs }
+    if r < I::zero() {
+        return if rhs > I::zero() { r + rhs } else { r - rhs }
     }
     r
 }
@@ -45,9 +46,9 @@ pub fn generate_seed() -> (u64, u64) {
     )
 }
 
-pub fn complex_to_hue<I: std::convert::Into<Complex32>>(z: I) -> f32 {
-    let z = z.into();
-    (z.arg() / PI + 1.0) / 2.0 * 360.0
+pub fn complex_to_hue<T: Float>(z: Complex<T>) -> T {
+    let pi = T::from(180).unwrap().to_radians();
+    (z.arg() / pi + T::one()) * T::from(180).unwrap()
 }
 
 pub fn map_to_unit_interval<I>(x: I, min: I, max: I) -> I

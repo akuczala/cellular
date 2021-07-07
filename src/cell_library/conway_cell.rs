@@ -2,6 +2,7 @@ use crate::grid::grid_view::GridView;
 use crate::util::{RandomGenerator, Color};
 use crate::cell::Cell;
 use crate::util::NEAREST_NEIGHBORS;
+use crate::grid::grid_pos::GridPos;
 
 const BIRTH_RULE: [bool; 9] = [false, false, false, true, false, false, false, false, false];
 const SURVIVE_RULE: [bool; 9] = [false, false, true, true, false, false, false, false, false];
@@ -43,7 +44,7 @@ impl ConwayCell {
     }
 }
 impl Cell for ConwayCell {
-    fn random(rng: &mut RandomGenerator) -> Self {
+    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
             let alive = randomize::f32_half_open_right(rng.next_u32()) > INITIAL_FILL;
             ConwayCell::new(alive)
     }

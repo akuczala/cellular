@@ -1,8 +1,6 @@
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
-
-pub const SCREEN_WIDTH: u32 = 400;
-pub const SCREEN_HEIGHT: u32 = 300;
+use crate::{GRID_WIDTH, GRID_HEIGHT};
 
 // COPYPASTE: ideally this could be shared.
 
@@ -27,8 +25,8 @@ pub(crate) fn create_window(
     let hidpi_factor = window.scale_factor();
 
     // Get dimensions
-    let width = SCREEN_WIDTH as f64;
-    let height = SCREEN_HEIGHT as f64;
+    let width = GRID_WIDTH as f64;
+    let height = GRID_HEIGHT as f64;
     let (monitor_width, monitor_height) = {
         if let Some(monitor) = window.current_monitor() {
             let size = monitor.size().to_logical(hidpi_factor);
