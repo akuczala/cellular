@@ -1,6 +1,6 @@
 use crate::cell::Cell;
 use crate::grid::grid_view::GridView;
-use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, SECOND_ORDER_CENTRAL, stencil_coords, map_to_unit_interval};
+use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, SECOND_ORDER_CENTRAL, stencil_coords, map_to_unit_interval, gauss};
 use crate::grid::grid_pos::GridPos;
 
 type Density = f32;
@@ -52,11 +52,11 @@ impl Cell for DiffusionCell {
         [shade, shade, shade, 0]
     }
 
-    fn toggle(&mut self) {
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
 
     }
 
-    fn line_action(&mut self, alive: bool) {
-        self.density = MAX_VISIBLE_DENSITY;
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+        self.density += gauss(1.0, 20.0, &target_pos, &grid_pos)
     }
 }

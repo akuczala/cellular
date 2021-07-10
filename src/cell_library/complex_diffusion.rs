@@ -1,6 +1,6 @@
 use num_complex::{Complex32, Complex64};
 use crate::cell::Cell;
-use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, complex_to_hue, SECOND_ORDER_CENTRAL, stencil_coords};
+use crate::util::{RandomGenerator, NEAREST_NEIGHBORS, N_NEAREST_NEIGHBORS, Color, complex_to_hue, SECOND_ORDER_CENTRAL, stencil_coords, gauss};
 use crate::grid::grid_view::GridView;
 use palette::{Hsv, LinSrgb, Pixel};
 use std::f32::consts::PI;
@@ -16,7 +16,7 @@ pub struct ComplexDiffusionCell {
 }
 impl ComplexDiffusionCell {
     fn diffusion_constant() -> Density {
-        0.001*Density::i()
+        0.005*Density::i()
     }
     fn avg_neighbors(grid_view: GridView<Self>) -> Density {
         NEAREST_NEIGHBORS
@@ -61,12 +61,12 @@ impl Cell for ComplexDiffusionCell {
         [rgb[0], rgb[1], rgb[2], 0]
     }
 
-    fn toggle(&mut self) {
-
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
+        self.density += gauss(1.0, 20.0, &target_pos, &grid_pos) * Density::new(MAX_ABS, 0.0);
     }
 
-    fn line_action(&mut self, alive: bool) {
-        self.density = Density::new(MAX_ABS, 0.0);
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+
     }
 }
 

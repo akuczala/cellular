@@ -22,7 +22,7 @@ impl<C: Cell> BoundaryTrait<C> for PeriodicBoundary {
     }
 }
 #[derive(Debug)]
-pub struct ConstantBoundary<C: Cell>(C);
+pub struct ConstantBoundary<C: Cell>(pub C);
 impl<C: Cell> ConstantBoundary<C> {
     pub fn empty() -> Self {
         ConstantBoundary(C::default())

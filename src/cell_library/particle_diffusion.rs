@@ -1,7 +1,7 @@
 use crate::cell::Cell;
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
-use crate::util::{RandomGenerator, map_to_unit_interval, generate_seed};
+use crate::util::{RandomGenerator, map_to_unit_interval, generate_seed, gauss};
 
 type ParticleCount = u32;
 #[derive(Clone,Default)]
@@ -74,12 +74,13 @@ impl Cell for ParticleDiffusionCell {
         [shade, shade, shade, 0]
     }
 
-    fn toggle(&mut self) {
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
 
     }
 
-    fn line_action(&mut self, alive: bool) {
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
         let mut rng: randomize::PCG32 = generate_seed().into();
-        self.particles = ParticleCounter::randomize_n(10, &mut rng);
+        let gauss_value = gauss(10.0, 20.0, &target_pos, &grid_pos);
+        self.particles = ParticleCounter::randomize_n(gauss_value as ParticleCount, &mut rng);
     }
 }

@@ -21,9 +21,9 @@ mod util;
 mod cell;
 mod cell_library;
 
-pub const GRID_WIDTH: u32 = 100;
-pub const GRID_HEIGHT: u32 = 100;
-pub const PER_FRAME_UPDATES: u32 = 10;
+pub const GRID_WIDTH: u32 = 200;
+pub const GRID_HEIGHT: u32 = 200;
+pub const PER_FRAME_UPDATES: u32 = 1;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
@@ -33,9 +33,9 @@ fn main() -> Result<(), Error> {
         create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-    let mut grid = Grid::<XYModelCell>::new_random(
+    let mut grid = Grid::<ParticleDiffusionCell>::new_random(
         GRID_WIDTH as usize, GRID_HEIGHT as usize,
-        PeriodicBoundary.into()
+        ConstantBoundary::empty().into()
 
     );
     let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;

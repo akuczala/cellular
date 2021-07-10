@@ -65,12 +65,15 @@ impl Cell for ConwayCell {
         }
     }
 
-    fn toggle(&mut self) {
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
         let was_alive = self.alive;
-        self.set_alive(!was_alive);
+        if (target_pos.x() == grid_pos.x()) & (target_pos.y() == grid_pos.y()) {
+            self.set_alive(!was_alive);
+        }
+
     }
 
-    fn line_action(&mut self, alive: bool) {
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
         self.set_alive(alive);
     }
 }

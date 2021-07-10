@@ -47,11 +47,11 @@ impl Cell for PhasedParticleDiffusionCell {
         todo!()
     }
 
-    fn toggle(&mut self) {
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
         todo!()
     }
 
-    fn line_action(&mut self, alive: bool) {
+    fn line_action(&mut self, grid_pos: GridPos, alive: bool) {
         todo!()
     }
 }

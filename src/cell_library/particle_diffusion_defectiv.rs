@@ -68,11 +68,11 @@ impl Cell for ParticleDiffusionCell {
         [shade, shade, shade, 0]
     }
 
-    fn toggle(&mut self) {
+    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
 
     }
 
-    fn line_action(&mut self, alive: bool) {
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
         self.particles = ParticleCounter::randomize_n(10, &mut self.rng);
     }
 }

@@ -3,7 +3,7 @@ use crate::grid::grid_pos::{GridPos, GridInt};
 use crate::cell::Cell;
 
 pub struct GridView<'a, C: Cell> {
-    origin: GridPos,
+    pub origin: GridPos,
     grid: &'a Grid<C>
 }
 impl<'a, C: Cell> GridView<'a, C> {
@@ -15,5 +15,11 @@ impl<'a, C: Cell> GridView<'a, C> {
     }
     pub fn get_cell_at(&self, pos: GridPos) -> &C {
         self.get_cell_at_coord(pos.x(), pos.y())
+    }
+    pub fn grid_width(&self) -> GridInt {
+        self.grid.width as GridInt
+    }
+    pub fn grid_height(&self) -> GridInt {
+        self.grid.height as GridInt
     }
 }
