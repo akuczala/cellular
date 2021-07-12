@@ -13,6 +13,9 @@ pub const SECOND_ORDER_CENTRAL: [[f32; 3]; 3] = [
     [1.0, -4.0, 1.0],
     [0.0,  1.0, 0.0]
 ];
+// pub const SECOND_ORDER_CENTRAL_5: [[f32; 5]; 5] = [
+//     [-1.0/12.0, 4.0/3.0, -5.0/2.0, 4.0/3.0, -1.0/12.0]
+// ]
 pub const SECOND_ORDER_CENTRAL_CROSS_SECTION: [[f32; 3]; 3] = [
     [0.0,  1.0, 0.0],
     [1.0, -6.0, 1.0],
@@ -58,8 +61,11 @@ pub fn complex_to_hue<T: Float>(z: Complex<T>) -> T {
 }
 
 pub fn map_to_unit_interval<I>(x: I, min: I, max: I) -> I
-where I: std::ops::Sub<I, Output=I> + std::ops::Div<I, Output=I> + Copy {
+where I: Num + Copy {
     (x - min)/(max - min)
+}
+pub fn map_from_unit_interval<I: Num + Copy>(x: I, min: I, max: I) -> I {
+    min + x * (max - min)
 }
 
 pub fn gauss<I: Float>(amplitude: I, sigma: I, mean:  &GridPos, grid_pos: &GridPos) -> I {

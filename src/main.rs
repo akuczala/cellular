@@ -14,16 +14,19 @@ use crate::window::create_window;
 use crate::cell_library::*;
 use num_complex::Complex32;
 use crate::grid::boundary::{ConstantBoundary, Boundary, FreeBoundary, PeriodicBoundary};
+use crate::generic_system::GenericSystem;
+use crate::cell::System;
 
 mod grid;
 mod window;
 mod util;
 mod cell;
 mod cell_library;
+mod generic_system;
 
 pub const GRID_WIDTH: u32 = 200;
 pub const GRID_HEIGHT: u32 = 200;
-pub const PER_FRAME_UPDATES: u32 = 1;
+pub const PER_FRAME_UPDATES: u32 = 10;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
@@ -33,11 +36,12 @@ fn main() -> Result<(), Error> {
         create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-    let mut grid = Grid::<ParticleDiffusionCell>::new_random(
-        GRID_WIDTH as usize, GRID_HEIGHT as usize,
+    let mut system = GenericSystem::<SchrodingerCell> {
+        grid: Grid::<SchrodingerCell>::new_random(
+            GRID_WIDTH as usize, GRID_HEIGHT as usize,
         ConstantBoundary::empty().into()
-
-    );
+        )
+    };
     let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;
     let mut paused = false;
 
@@ -46,7 +50,7 @@ fn main() -> Result<(), Error> {
     event_loop.run(move |event, _, control_flow| {
         // The one and only event that winit_input_helper doesn't have for us...
         if let Event::RedrawRequested(_) = event {
-            grid.draw(pixels.get_frame());
+            system.grid.draw(pixels.get_frame());
             if pixels
                 .render()
                 .map_err(|e| error!("pixels.render() failed: {}", e))
@@ -73,7 +77,7 @@ fn main() -> Result<(), Error> {
                 paused = true;
             }
             if input.key_pressed(VirtualKeyCode::R) {
-                grid.randomize();
+                system.grid.randomize();
             }
             if input.key_pressed(VirtualKeyCode::A) {
                 // let density_sum: f64 = grid.cells.iter()
@@ -82,7 +86,7 @@ fn main() -> Result<(), Error> {
                 // println!("{:?}", density_sum);
             }
             if input.key_pressed(VirtualKeyCode::C) {
-                grid.clear();
+                system.grid.clear();
             }
             // Handle mouse. This is a bit involved since support some simple
             // line drawing (mostly because it makes nice looking patterns).
@@ -110,7 +114,7 @@ fn main() -> Result<(), Error> {
 
             if input.mouse_pressed(0) {
                 debug!("Mouse click at {:?}", mouse_cell);
-                draw_state = Some(grid.toggle(mouse_cell.0, mouse_cell.1));
+                draw_state = Some(system.toggle(mouse_cell.0, mouse_cell.1));
             } else if let Some(draw_alive) = draw_state {
                 let release = input.mouse_released(0);
                 let held = input.mouse_held(0);
@@ -120,7 +124,7 @@ fn main() -> Result<(), Error> {
                 // in the middle of drawing, keep going.
                 if release || held {
                     debug!("Draw line of {:?}", draw_alive);
-                    grid.set_line(
+                    system.set_line(
                         mouse_prev_cell.0,
                         mouse_prev_cell.1,
                         mouse_cell.0,
@@ -144,7 +148,7 @@ fn main() -> Result<(), Error> {
             }
             if !paused || input.key_pressed(VirtualKeyCode::Space) {
                 for _ in 0..PER_FRAME_UPDATES {
-                    grid.update();
+                    system.update();
                 }
             }
             window.request_redraw();

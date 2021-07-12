@@ -1,5 +1,6 @@
 pub type GridInt = i32;
 
+#[derive(Copy,Clone)]
 pub struct GridPos {
     x: GridInt,
     y: GridInt
