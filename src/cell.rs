@@ -1,7 +1,7 @@
+use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::grid_view::GridView;
-use crate::util::{Color, RandomGenerator};
-use crate::grid::grid_pos::{GridPos, GridInt};
 use crate::grid::Grid;
+use crate::util::{Color, RandomGenerator};
 
 pub trait Cell: Default + Clone {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self;

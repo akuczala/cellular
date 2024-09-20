@@ -1,13 +1,13 @@
 use grid_view::GridView;
 
-use crate::util::{generate_seed};
-use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::cell::Cell;
 use crate::grid::boundary::{Boundary, BoundaryTrait};
+use crate::grid::grid_pos::{GridInt, GridPos};
+use crate::util::generate_seed;
 
+pub mod boundary;
 pub mod grid_pos;
 pub mod grid_view;
-pub mod boundary;
 
 #[derive(Debug)]
 pub struct Grid<C: Cell> {
@@ -30,7 +30,7 @@ impl<'a, C: Cell> Grid<C> {
             scratch_cells: vec![C::default(); size],
             width,
             height,
-            boundary
+            boundary,
         }
     }
 
@@ -67,12 +67,11 @@ impl<'a, C: Cell> Grid<C> {
     pub fn to_idx(&self, grid_pos: &GridPos) -> usize {
         grid_pos.x() as usize + grid_pos.y() as usize * self.width
     }
-    pub fn get_grid_pos_iter(&self) -> impl Iterator<Item=GridPos> {
+    pub fn get_grid_pos_iter(&self) -> impl Iterator<Item = GridPos> {
         let (width, height) = (self.width as GridInt, self.height as GridInt);
         (0..height)
-            .map(move |y| (0..width)
-                .map(move |x| GridPos::new(x as GridInt, y as GridInt))
-            ).flatten()
+            .map(move |y| (0..width).map(move |x| GridPos::new(x as GridInt, y as GridInt)))
+            .flatten()
     }
 
     pub fn draw(&self, screen: &mut [u8]) {

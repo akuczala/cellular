@@ -1,6 +1,6 @@
+use crate::{GRID_HEIGHT, GRID_WIDTH};
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
-use crate::{GRID_WIDTH, GRID_HEIGHT};
 
 // COPYPASTE: ideally this could be shared.
 

@@ -10,23 +10,23 @@ use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit_input_helper::WinitInputHelper;
 
-use crate::grid::Grid;
-use crate::window::create_window;
-use crate::cell_library::*;
-use num_complex::Complex32;
-use crate::grid::boundary::{ConstantBoundary, Boundary, FreeBoundary, PeriodicBoundary};
-use crate::generic_system::{GenericSystem, GenericSystemData};
 use crate::cell::System;
+use crate::cell_library::*;
+use crate::generic_system::{GenericSystem, GenericSystemData};
+use crate::grid::boundary::{Boundary, ConstantBoundary, FreeBoundary, PeriodicBoundary};
+use crate::grid::Grid;
 use crate::phased_particle_system::PhasedParticleSystem;
+use crate::window::create_window;
+use num_complex::Complex32;
 use num_traits::real::Real;
 
-mod grid;
-mod window;
-mod util;
 mod cell;
 mod cell_library;
 mod generic_system;
+mod grid;
 mod phased_particle_system;
+mod util;
+mod window;
 
 pub const GRID_WIDTH: u32 = 200;
 pub const GRID_HEIGHT: u32 = 200;
@@ -36,18 +36,17 @@ fn main() -> Result<(), Error> {
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
-    let (window, p_width, p_height, mut _hidpi_factor) =
-        create_window("Cellular", &event_loop);
+    let (window, p_width, p_height, mut _hidpi_factor) = create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     //let n = 10_usize.pow(7);
     //let n = 2;
 
-    let mut system = GenericSystem::<XYModelCell>::new(
-        Grid::new_random(
-            GRID_WIDTH as usize, GRID_HEIGHT as usize,
-        PeriodicBoundary.into())
-    );
+    let mut system = GenericSystem::<XYModelCell>::new(Grid::new_random(
+        GRID_WIDTH as usize,
+        GRID_HEIGHT as usize,
+        PeriodicBoundary.into(),
+    ));
     let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;
     let mut paused = false;
 
@@ -92,9 +91,16 @@ fn main() -> Result<(), Error> {
                 // println!("{:?}", density_sum);
             }
             if input.key_pressed(VirtualKeyCode::E) {
-                let total_energy: f32 = system.grid.get_grid_pos_iter().map(
-                    |p| system.grid.get_cell_at(p).get_energy(&GridView::new(p, &system.grid))
-                ).sum();
+                let total_energy: f32 = system
+                    .grid
+                    .get_grid_pos_iter()
+                    .map(|p| {
+                        system
+                            .grid
+                            .get_cell_at(p)
+                            .get_energy(&GridView::new(p, &system.grid))
+                    })
+                    .sum();
                 println!("Total energy {:?}", total_energy)
             }
             if input.key_pressed(VirtualKeyCode::C) {

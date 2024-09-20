@@ -1,8 +1,8 @@
-use crate::grid::grid_view::GridView;
-use crate::util::{RandomGenerator, Color};
 use crate::cell::Cell;
-use crate::util::NEAREST_NEIGHBORS;
 use crate::grid::grid_pos::GridPos;
+use crate::grid::grid_view::GridView;
+use crate::util::NEAREST_NEIGHBORS;
+use crate::util::{Color, RandomGenerator};
 
 const BIRTH_RULE: [bool; 9] = [false, false, false, true, false, false, false, false, false];
 const SURVIVE_RULE: [bool; 9] = [false, false, true, true, false, false, false, false, false];
@@ -26,7 +26,7 @@ impl ConwayCell {
     fn count_neibs(grid_view: GridView<Self>) -> usize {
         NEAREST_NEIGHBORS
             .iter()
-            .map(|dxy| { grid_view.get_cell_at_coord(dxy[0], dxy[1]).alive as usize })
+            .map(|dxy| grid_view.get_cell_at_coord(dxy[0], dxy[1]).alive as usize)
             .sum()
     }
     fn set_alive(&mut self, alive: bool) {
@@ -45,8 +45,8 @@ impl ConwayCell {
 }
 impl Cell for ConwayCell {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
-            let alive = randomize::f32_half_open_right(rng.next_u32()) > INITIAL_FILL;
-            ConwayCell::new(alive)
+        let alive = randomize::f32_half_open_right(rng.next_u32()) > INITIAL_FILL;
+        ConwayCell::new(alive)
     }
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let n = ConwayCell::count_neibs(grid_view);
@@ -70,7 +70,6 @@ impl Cell for ConwayCell {
         if (target_pos.x() == grid_pos.x()) & (target_pos.y() == grid_pos.y()) {
             self.set_alive(!was_alive);
         }
-
     }
 
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {

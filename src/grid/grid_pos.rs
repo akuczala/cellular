@@ -1,13 +1,13 @@
 pub type GridInt = i32;
 
-#[derive(Copy,Clone,Default, Hash, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, Default, Hash, PartialEq, Eq, Debug)]
 pub struct GridPos {
     x: GridInt,
-    y: GridInt
+    y: GridInt,
 }
 impl GridPos {
     pub fn new(x: GridInt, y: GridInt) -> Self {
-        GridPos{x, y}
+        GridPos { x, y }
     }
     pub fn x(&self) -> GridInt {
         self.x

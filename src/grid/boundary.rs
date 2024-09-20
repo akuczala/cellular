@@ -1,11 +1,11 @@
 use crate::cell::Cell;
-use crate::grid::grid_pos::{GridPos, GridInt};
-use crate::util::modulo;
+use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::Grid;
+use crate::util::modulo;
 use enum_dispatch::enum_dispatch;
 
 #[enum_dispatch]
-pub trait BoundaryTrait<C : Cell> {
+pub trait BoundaryTrait<C: Cell> {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C;
 }
 
@@ -14,10 +14,7 @@ pub struct PeriodicBoundary;
 impl<C: Cell> BoundaryTrait<C> for PeriodicBoundary {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C {
         let (width, height) = (grid.width as GridInt, grid.height as GridInt);
-        let new_grid_pos = GridPos::new(
-            modulo(grid_pos.x(), width),
-            modulo(grid_pos.y(), height)
-        );
+        let new_grid_pos = GridPos::new(modulo(grid_pos.x(), width), modulo(grid_pos.y(), height));
         grid.raw_get_cell_at(&new_grid_pos).unwrap()
     }
 }
@@ -32,7 +29,7 @@ impl<C: Cell> BoundaryTrait<C> for ConstantBoundary<C> {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C {
         match grid.raw_get_cell_at(grid_pos) {
             Some(cell) => cell,
-            None => &self.0
+            None => &self.0,
         }
     }
 }
@@ -43,7 +40,7 @@ impl<C: Cell> BoundaryTrait<C> for FreeBoundary {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C {
         let new_grid_pos = GridPos::new(
             grid_pos.x().clamp(0, (grid.width - 1) as GridInt),
-            grid_pos.y().clamp(0, (grid.height - 1) as GridInt)
+            grid_pos.y().clamp(0, (grid.height - 1) as GridInt),
         );
         grid.raw_get_cell_at(&new_grid_pos).unwrap()
     }
@@ -54,5 +51,5 @@ impl<C: Cell> BoundaryTrait<C> for FreeBoundary {
 pub enum Boundary<C: Cell> {
     PeriodicBoundary,
     ConstantBoundary(ConstantBoundary<C>),
-    FreeBoundary
+    FreeBoundary,
 }

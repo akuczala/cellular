@@ -1,7 +1,7 @@
 use crate::cell::{Cell, System};
-use crate::grid::Grid;
+use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::grid_view::GridView;
-use crate::grid::grid_pos::{GridPos, GridInt};
+use crate::grid::Grid;
 
 pub struct GenericSystemData(pub i32);
 
@@ -10,9 +10,8 @@ pub struct GenericSystem<C: Cell> {
 }
 impl<C: Cell> GenericSystem<C> {
     pub fn new(grid: Grid<C>) -> Self {
-        Self{grid}
+        Self { grid }
     }
-
 }
 impl<C: Cell> System<C> for GenericSystem<C> {
     fn update(&mut self) {
@@ -47,7 +46,7 @@ impl<C: Cell> System<C> for GenericSystem<C> {
                 }
                 true
             }
-            None => false
+            None => false,
         }
     }
     fn line_action(&mut self, target_pos: GridPos, alive: bool) {
@@ -55,6 +54,5 @@ impl<C: Cell> System<C> for GenericSystem<C> {
             let idx = self.grid.to_idx(&grid_pos);
             self.grid.cells[idx].line_action(&target_pos, &grid_pos, alive)
         }
-
     }
 }
