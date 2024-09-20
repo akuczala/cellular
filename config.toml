@@ -1,0 +1,4 @@
+grid_width = 20
+grid_height = 20
+per_frame_updates = 1
+system = "Conway"

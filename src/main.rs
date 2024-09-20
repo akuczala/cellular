@@ -3,6 +3,7 @@
 #![deny(clippy::all)]
 #![forbid(unsafe_code)]
 
+use config::read_config;
 use grid::grid_view::GridView;
 use log::{debug, error};
 use pixels::{Error, Pixels, SurfaceTexture};
@@ -20,6 +21,7 @@ use crate::window::create_window;
 
 mod cell;
 mod cell_library;
+mod config;
 mod generic_system;
 mod grid;
 mod input;
@@ -27,26 +29,26 @@ mod input;
 mod util;
 mod window;
 
-pub const GRID_WIDTH: u32 = 200;
-pub const GRID_HEIGHT: u32 = 200;
-pub const PER_FRAME_UPDATES: u32 = 1;
-
 fn main() -> Result<(), Error> {
+    let config = read_config();
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
-    let (window, p_width, p_height, mut _hidpi_factor) = create_window("Cellular", &event_loop);
+    let (window, p_width, p_height, mut _hidpi_factor) = create_window(
+        "Cellular",
+        &event_loop,
+        config.grid_width,
+        config.grid_height,
+    );
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-    //let n = 10_usize.pow(7);
-    //let n = 2;
 
     let mut system = GenericSystem::<XYModelCell>::new(Grid::new_random(
-        GRID_WIDTH as usize,
-        GRID_HEIGHT as usize,
+        config.grid_width as usize,
+        config.grid_height as usize,
         PeriodicBoundary.into(),
     ));
-    let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;
+    let mut pixels = Pixels::new(config.grid_width, config.grid_height, surface_texture)?;
     let mut paused = false;
 
     let mut draw_state: Option<bool> = None;
@@ -159,7 +161,7 @@ fn main() -> Result<(), Error> {
                 pixels.resize_surface(size.width, size.height);
             }
             if !paused || input.key_pressed(VirtualKeyCode::Space) {
-                for _ in 0..PER_FRAME_UPDATES {
+                for _ in 0..config.per_frame_updates {
                     system.update();
                 }
             }

@@ -83,7 +83,6 @@ impl Cell for ComplexDiffusionCell {
 
 #[test]
 fn test_draw() {
-    
     let cell = ComplexDiffusionCell {
         density: Density::new(-1.0, 0.0),
     };

@@ -1,4 +1,3 @@
-use crate::{GRID_HEIGHT, GRID_WIDTH};
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
 
@@ -15,6 +14,8 @@ use winit::event_loop::EventLoop;
 pub(crate) fn create_window(
     title: &str,
     event_loop: &EventLoop<()>,
+    grid_width: u32,
+    grid_height: u32,
 ) -> (winit::window::Window, u32, u32, f64) {
     // Create a hidden window so we can estimate a good default window size
     let window = winit::window::WindowBuilder::new()
@@ -25,8 +26,8 @@ pub(crate) fn create_window(
     let hidpi_factor = window.scale_factor();
 
     // Get dimensions
-    let width = GRID_WIDTH as f64;
-    let height = GRID_HEIGHT as f64;
+    let width = grid_width as f64;
+    let height = grid_height as f64;
     let (monitor_width, monitor_height) = {
         if let Some(monitor) = window.current_monitor() {
             let size = monitor.size().to_logical(hidpi_factor);

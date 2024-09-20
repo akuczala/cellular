@@ -1,10 +1,10 @@
-use crate::grid::grid_pos::{GridPos};
+use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 
 use crate::util::{Color, RandomGenerator};
 
 // TODO: deprecate this oopy shit
-pub trait Cell: Default + Clone {
+pub trait Cell: Clone {
     fn update(&self, grid_view: GridView<Self>) -> Self;
     // todo make toggle and line action return new cells
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos);
