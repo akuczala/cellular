@@ -1,6 +1,6 @@
 pub use grid_view::GridView;
 
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::boundary::{Boundary, BoundaryTrait};
 use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::util::generate_seed;
@@ -40,19 +40,6 @@ impl<'a, C: Cell> Grid<C> {
         }
     }
 
-    pub fn new_random(width: usize, height: usize, boundary: Boundary<C>) -> Self {
-        let mut result = Self::new_empty(width, height, boundary);
-        result.randomize();
-        result
-    }
-
-    pub fn randomize(&mut self) {
-        let mut rng: randomize::PCG32 = generate_seed().into();
-        for grid_pos in self.get_grid_pos_iter() {
-            let idx = self.to_idx(&grid_pos);
-            self.cells[idx] = C::random(&mut rng, grid_pos);
-        }
-    }
     pub fn swap(&mut self) {
         std::mem::swap(&mut self.scratch_cells, &mut self.cells);
     }
@@ -92,5 +79,19 @@ impl<'a, C: Cell> Grid<C> {
         } else {
             None
         }
+    }
+}
+impl <'a, C: Cell + Randomize> Grid<C> {
+    pub fn randomize(&mut self) {
+        let mut rng: randomize::PCG32 = generate_seed().into();
+        for grid_pos in self.get_grid_pos_iter() {
+            let idx = self.to_idx(&grid_pos);
+            self.cells[idx] = C::random(&mut rng, grid_pos);
+        }
+    }
+    pub fn new_random(width: usize, height: usize, boundary: Boundary<C>) -> Self {
+        let mut result = Self::new_empty(width, height, boundary);
+        result.randomize();
+        result
     }
 }

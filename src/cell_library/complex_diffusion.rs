@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -37,8 +37,7 @@ impl ComplexDiffusionCell {
             .sum()
     }
 }
-
-impl Cell for ComplexDiffusionCell {
+impl Randomize for ComplexDiffusionCell {
     fn random(_rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
         let _radius = if (grid_pos.x > 50) & (grid_pos.y > 50) {
             //randomize::f32_half_open_right(rng.next_u32()) * 1.0
@@ -55,6 +54,8 @@ impl Cell for ComplexDiffusionCell {
             density: Density::from_polar(radius as Float, theta as Float),
         }
     }
+}
+impl Cell for ComplexDiffusionCell {
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let new_density: Density =

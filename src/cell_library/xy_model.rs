@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::grid_view::GridView;
 use crate::util::{gauss, map_to_unit_interval, modulo, RandomGenerator};
@@ -63,7 +63,7 @@ impl XYModelCell {
         todo!()
     }
 }
-impl Cell for XYModelCell {
+impl Randomize for XYModelCell {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
         let value = (grid_pos.x / 10) * (grid_pos.y / 10);
         let value = (value as Float) / 10.0;
@@ -74,6 +74,9 @@ impl Cell for XYModelCell {
             velocity: 0.0,
         }
     }
+}
+impl Cell for XYModelCell {
+    
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let velocity = self.velocity * (1.0 - DAMPING * DT) + DT * self.get_force(&grid_view);

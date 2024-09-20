@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::NEAREST_NEIGHBORS;
@@ -43,11 +43,13 @@ impl ConwayCell {
         self
     }
 }
-impl Cell for ConwayCell {
+impl Randomize for ConwayCell {
     fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let alive = randomize::f32_half_open_right(rng.next_u32()) > INITIAL_FILL;
         ConwayCell::new(alive)
     }
+}
+impl Cell for ConwayCell {
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let n = ConwayCell::count_neibs(grid_view);
         let next_alive = if self.alive {

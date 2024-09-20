@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{gauss, generate_seed, map_to_unit_interval, RandomGenerator};
@@ -59,13 +59,17 @@ impl ParticleDiffusionCell {
             + grid_view.get_cell_at_coord(0, -1).particles.down
     }
 }
-impl Cell for ParticleDiffusionCell {
+impl Randomize for ParticleDiffusionCell {
     fn random(_rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let mut rng: randomize::PCG32 = generate_seed().into();
         let n = randomize::RandRangeU32::new(0, 5).sample(&mut rng);
         let particles = ParticleCounter::randomize_n(n, &mut rng);
         Self { particles, rng }
     }
+}
+
+impl Cell for ParticleDiffusionCell {
+    
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let n = Self::get_n_incoming(grid_view);

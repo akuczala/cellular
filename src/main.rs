@@ -24,6 +24,7 @@ mod cell;
 mod cell_library;
 mod generic_system;
 mod grid;
+mod input;
 mod phased_particle_system;
 mod util;
 mod window;
@@ -69,27 +70,25 @@ fn main() -> Result<(), Error> {
         // For everything else, for let winit_input_helper collect events to build its state.
         // It returns `true` when it is time to update our game state and request a redraw.
         if input.update(&event) {
+            let input_result = input::handle_input(&input);
             // Close events
-            if input.key_pressed(VirtualKeyCode::Escape) || input.quit() {
+            if input_result.request_exit {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
-            if input.key_pressed(VirtualKeyCode::P) {
+
+            if input_result.pause {
                 paused = !paused;
             }
-            if input.key_pressed(VirtualKeyCode::Space) {
-                // Space is frame-step, so ensure we're paused
-                paused = true;
-            }
-            if input.key_pressed(VirtualKeyCode::R) {
+
+            if input_result.randomize {
                 system.grid.randomize();
             }
-            if input.key_pressed(VirtualKeyCode::A) {
-                // let density_sum: f64 = grid.cells.iter()
-                //     .map(|c| c.density.norm_sqr())
-                //     .sum::<f64>();
-                // println!("{:?}", density_sum);
+            
+            if input_result.clear {
+                system.grid.clear();
             }
+
             if input.key_pressed(VirtualKeyCode::E) {
                 let total_energy: f32 = system
                     .grid
@@ -102,9 +101,6 @@ fn main() -> Result<(), Error> {
                     })
                     .sum();
                 println!("Total energy {:?}", total_energy)
-            }
-            if input.key_pressed(VirtualKeyCode::C) {
-                system.grid.clear();
             }
             // Handle mouse. This is a bit involved since support some simple
             // line drawing (mostly because it makes nice looking patterns).

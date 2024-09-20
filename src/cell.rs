@@ -5,13 +5,19 @@ use crate::util::{Color, RandomGenerator};
 
 // TODO: deprecate this oopy shit
 pub trait Cell: Default + Clone {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self;
     fn update(&self, grid_view: GridView<Self>) -> Self;
     fn draw(&self) -> Color;
     // todo make toggle and line action return new cells
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos);
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool);
     // fn aggregate(&self) ->
+}
+
+pub trait Randomize {
+    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self;
+}
+pub trait HasColor {
+    fn draw(&self) -> Color;
 }
 
 pub trait System<C: Cell> {

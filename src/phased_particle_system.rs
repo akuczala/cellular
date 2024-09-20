@@ -190,9 +190,6 @@ impl PhasedParticleCell {
     }
 }
 impl Cell for PhasedParticleCell {
-    fn random(_rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
-        unimplemented!()
-    }
 
     fn update(&self, _grid_view: GridView<Self>) -> Self {
         unimplemented!()

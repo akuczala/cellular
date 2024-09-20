@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -32,7 +32,7 @@ impl DiffusionCell {
             .sum()
     }
 }
-impl Cell for DiffusionCell {
+impl Randomize for DiffusionCell {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
         let density = if grid_pos.x > 50 {
             randomize::f32_half_open_right(rng.next_u32()) * 1.0
@@ -41,6 +41,9 @@ impl Cell for DiffusionCell {
         };
         Self { density }
     }
+}
+impl Cell for DiffusionCell {
+   
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let new_density: Density = Self::laplace(grid_view) * DIFFUSION_CONSTANT + self.density;

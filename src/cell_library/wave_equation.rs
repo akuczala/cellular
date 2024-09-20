@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -54,7 +54,7 @@ impl WaveCell {
         }
     }
 }
-impl Cell for WaveCell {
+impl Randomize for WaveCell {
     fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let value = randomize::f32_half_open_right(rng.next_u32()) * 2.0 - 1.0;
         Self {
@@ -63,6 +63,9 @@ impl Cell for WaveCell {
         }
         //Self::mode(5, 3, grid_pos)
     }
+}
+impl Cell for WaveCell {
+    
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let velocity = self.velocity * (1.0 - DAMPING * DT)

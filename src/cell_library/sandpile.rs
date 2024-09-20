@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{Color, RandomGenerator};
@@ -35,13 +35,16 @@ impl AbelianSandpileCell {
         [shade, shade / 2, shade / 4, 0]
     }
 }
-impl Cell for AbelianSandpileCell {
+impl Randomize for AbelianSandpileCell {
     fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let rand_int = RandRangeU32::new(0, 4);
         Self {
             height: rand_int.sample(rng) as i32,
         }
     }
+}
+impl Cell for AbelianSandpileCell {
+    
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let sand_in = Self::get_neighbor_sand(&grid_view);

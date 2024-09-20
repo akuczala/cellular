@@ -1,4 +1,4 @@
-use crate::cell::Cell;
+use crate::cell::{Cell, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -108,7 +108,7 @@ impl SchrodingerCell {
         }
     }
 }
-impl Cell for SchrodingerCell {
+impl Randomize for SchrodingerCell {
     fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         Self {
             real: 0.1
@@ -118,6 +118,9 @@ impl Cell for SchrodingerCell {
             update_phase: CellDataLabel::Real,
         }
     }
+}
+impl Cell for SchrodingerCell {
+    
 
     fn update(&self, grid_view: GridView<Self>) -> Self {
         match self.update_phase {
