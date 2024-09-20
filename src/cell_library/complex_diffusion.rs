@@ -62,7 +62,7 @@ impl Cell for ComplexDiffusionCell {
     }
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
-        self.density += gauss(1.0, 20.0, &target_pos, &grid_pos) * Density::new(MAX_ABS, 0.0);
+        self.density += gauss(1.0, [20.0, 20.0], &target_pos, &grid_pos) * Density::new(MAX_ABS, 0.0);
     }
 
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {

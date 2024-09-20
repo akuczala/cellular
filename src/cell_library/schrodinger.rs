@@ -8,7 +8,7 @@ use std::f32::consts::PI;
 
 type Float = f32;
 
-const DT: Float = 0.05;
+const DT: Float = 0.1;
 
 #[derive(Default, Clone)]
 pub struct SchrodingerCell {
@@ -34,6 +34,14 @@ impl SchrodingerCell {
             .map(|(weight, dpos)| weight * grid_view.get_cell_at(dpos).get_data(label))
             .sum()
     }
+    fn one_dimensional_hamiltonian(&self, grid_view: GridView<Self>, label: CellDataLabel) -> Float {
+        let laplace: Float = [-1, 0, 1].iter().zip([1.0, -2.0, 1.0])
+            .map(|(&di, weight)|
+                weight * grid_view.get_cell_at(GridPos::new(di, 0)).get_data(label)
+            )
+            .sum();
+        -laplace
+    }
     fn hamiltonian(&self, grid_view: GridView<Self>, label: CellDataLabel) -> Float {
         -Self::laplace(&grid_view, label) + Self::potential(&grid_view.origin) * self.get_data(label)
     }
@@ -44,7 +52,10 @@ impl SchrodingerCell {
         }
     }
     fn potential(grid_pos: &GridPos) -> Float {
-        Self::circular_well(grid_pos)
+        Self::quartic_potential(grid_pos)
+    }
+    fn free_potential(grid_pos: &GridPos) -> Float {
+        0.0
     }
     fn step_potential(grid_pos: &GridPos) -> Float {
         let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
@@ -58,6 +69,13 @@ impl SchrodingerCell {
         let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
         let x = x - radius; let y = y - radius;
         (x * x + y * y)/(Float::powi(radius,2)) * 4.0
+
+    }
+    fn coupled_harmonic_potential(grid_pos: &GridPos) -> Float {
+        let radius = 100.0;
+        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let x = x - radius; let y = y - radius;
+        (x * x + y * y + ((x + y).powi(2)))/(Float::powi(radius,2)) * 2.0
 
     }
     fn quartic_potential(grid_pos: &GridPos) -> Float {
@@ -83,8 +101,8 @@ impl SchrodingerCell {
 impl Cell for SchrodingerCell {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
         Self {
-            real: 0.0*map_from_unit_interval(randomize::f32_half_open_right(rng.next_u32()), -1.0, 1.0),
-            imag: 0.0*map_from_unit_interval(randomize::f32_half_open_right(rng.next_u32()), -1.0, 1.0),
+            real: 0.1*map_from_unit_interval(randomize::f32_half_open_right(rng.next_u32()), -1.0, 1.0),
+            imag: 0.1*map_from_unit_interval(randomize::f32_half_open_right(rng.next_u32()), -1.0, 1.0),
             update_phase: CellDataLabel::Real
         }
     }
@@ -110,7 +128,7 @@ impl Cell for SchrodingerCell {
     }
 
     fn draw(&self) -> [u8; 4] {
-        //note: for conserved probability you need to track and mix more timestamps
+        //note: to display conserved probability you need to track and mix more timestamps
         let z = Complex32::new(self.real, self.imag);
         let hue = complex_to_hue(z);
         let value = z.norm();
@@ -123,10 +141,10 @@ impl Cell for SchrodingerCell {
         let wavelength = 20.0;
         let wave_vec = [1.0, 0.0];
         let amplitude = 20.0 / (PI.sqrt() * sigma);
-        let gauss_value = gauss(amplitude, sigma, &target_pos, &grid_pos);
+        let gauss_value = gauss(amplitude, [sigma, sigma], &target_pos, &grid_pos);
         let phase =  2.0 * PI *
             ((grid_pos.x() as Float) * wave_vec[0] + (grid_pos.y() as Float) * wave_vec[1]) / wavelength;
-        //let phase = phase * 0.0;
+        let phase = phase * 0.0;
         self.real += gauss_value * phase.cos();
         self.imag += gauss_value * phase.sin();
     }

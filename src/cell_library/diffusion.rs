@@ -57,6 +57,6 @@ impl Cell for DiffusionCell {
     }
 
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
-        self.density += gauss(1.0, 20.0, &target_pos, &grid_pos)
+        self.density += gauss(1.0, [20.0, 20.0], &target_pos, &grid_pos)
     }
 }

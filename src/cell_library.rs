@@ -5,6 +5,7 @@ mod particle_diffusion;
 mod xy_model;
 mod wave_equation;
 mod schrodinger;
+mod sandpile;
 //mod phased_particle_diffusion_2;
 // mod phased_particle_diffusion;
 
@@ -16,3 +17,4 @@ pub use particle_diffusion::ParticleDiffusionCell;
 pub use xy_model::XYModelCell;
 pub use wave_equation::WaveCell;
 pub use schrodinger::SchrodingerCell;
+pub use sandpile::AbelianSandpileCell;

@@ -3,15 +3,7 @@ use crate::util::RandomGenerator;
 use crate::cell::Cell;
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
-#[derive(Default)]
-struct Particle {
-    phase: Complex32,
-    pos: GridPos
-}
-#[derive(Default)]
-pub struct Particles {
-    particles: Vec<Particle>
-}
+
 #[derive(Default)]
 pub struct PhasedParticleDiffusionCell {
     particles: Particles,

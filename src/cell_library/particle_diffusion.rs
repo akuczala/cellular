@@ -80,7 +80,7 @@ impl Cell for ParticleDiffusionCell {
 
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
         let mut rng: randomize::PCG32 = generate_seed().into();
-        let gauss_value = gauss(10.0, 20.0, &target_pos, &grid_pos);
+        let gauss_value = gauss(10.0, [20.0, 20.0], &target_pos, &grid_pos);
         self.particles = ParticleCounter::randomize_n(gauss_value as ParticleCount, &mut rng);
     }
 }

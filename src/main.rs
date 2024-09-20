@@ -3,6 +3,7 @@
 #![deny(clippy::all)]
 #![forbid(unsafe_code)]
 
+use grid::grid_view::GridView;
 use log::{debug, error};
 use pixels::{Error, Pixels, SurfaceTexture};
 use winit::event::{Event, VirtualKeyCode};
@@ -14,8 +15,10 @@ use crate::window::create_window;
 use crate::cell_library::*;
 use num_complex::Complex32;
 use crate::grid::boundary::{ConstantBoundary, Boundary, FreeBoundary, PeriodicBoundary};
-use crate::generic_system::GenericSystem;
+use crate::generic_system::{GenericSystem, GenericSystemData};
 use crate::cell::System;
+use crate::phased_particle_system::PhasedParticleSystem;
+use num_traits::real::Real;
 
 mod grid;
 mod window;
@@ -23,10 +26,11 @@ mod util;
 mod cell;
 mod cell_library;
 mod generic_system;
+mod phased_particle_system;
 
 pub const GRID_WIDTH: u32 = 200;
 pub const GRID_HEIGHT: u32 = 200;
-pub const PER_FRAME_UPDATES: u32 = 10;
+pub const PER_FRAME_UPDATES: u32 = 1;
 
 fn main() -> Result<(), Error> {
     env_logger::init();
@@ -36,12 +40,14 @@ fn main() -> Result<(), Error> {
         create_window("Cellular", &event_loop);
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-    let mut system = GenericSystem::<SchrodingerCell> {
-        grid: Grid::<SchrodingerCell>::new_random(
+    //let n = 10_usize.pow(7);
+    //let n = 2;
+
+    let mut system = GenericSystem::<XYModelCell>::new(
+        Grid::new_random(
             GRID_WIDTH as usize, GRID_HEIGHT as usize,
-        ConstantBoundary::empty().into()
-        )
-    };
+        PeriodicBoundary.into())
+    );
     let mut pixels = Pixels::new(GRID_WIDTH, GRID_HEIGHT, surface_texture)?;
     let mut paused = false;
 
@@ -84,6 +90,12 @@ fn main() -> Result<(), Error> {
                 //     .map(|c| c.density.norm_sqr())
                 //     .sum::<f64>();
                 // println!("{:?}", density_sum);
+            }
+            if input.key_pressed(VirtualKeyCode::E) {
+                let total_energy: f32 = system.grid.get_grid_pos_iter().map(
+                    |p| system.grid.get_cell_at(p).get_energy(&GridView::new(p, &system.grid))
+                ).sum();
+                println!("Total energy {:?}", total_energy)
             }
             if input.key_pressed(VirtualKeyCode::C) {
                 system.grid.clear();

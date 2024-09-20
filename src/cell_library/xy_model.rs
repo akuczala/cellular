@@ -8,9 +8,10 @@ use palette::{Hsv, Srgb, Pixel};
 type Float = f32;
 const J: Float = 1.0;
 const H: Float = 0.0;
-const DAMPING: Float = 0.1;
+const DAMPING: Float = 0.0;
 const TWO_PI: Float = 2.0*PI;
 const DT: Float = 0.01;
+const TEMPERATURE: Float = 0.1;
 
 
 #[derive(Clone,Default)]
@@ -19,6 +20,20 @@ pub struct XYModelCell {
     pub velocity: Float
 }
 impl XYModelCell {
+    fn get_energy_from(&self, grid_view: &GridView<Self>, di: GridInt, dj: GridInt) -> Float {
+        let other_cell = grid_view.get_cell_at_coord(di, dj);
+        let self_angle = TWO_PI * self.value;
+        let delta_angle = self_angle - TWO_PI * other_cell.value;
+        -J * (delta_angle.cos())
+    }
+    pub fn get_energy(&self, grid_view: &GridView<Self>) -> Float {
+        // this term is called 'kinetic' in processing, but it looks like an external field term
+        let kinetic = - H * (TWO_PI * grid_view.get_cell_at_coord(0, 0).value).cos();
+        let potential: Float = [(1,0),(-1,0),(0,1),(0,-1)].iter()
+            .map(|(di,dj)| self.get_energy_from(grid_view, *di, *dj))
+            .sum();
+        return kinetic + potential
+    }
     fn get_force_from(&self, grid_view: &GridView<Self>, di: GridInt, dj: GridInt) -> Float {
         let other_cell = grid_view.get_cell_at_coord(di, dj);
         let self_angle = TWO_PI * self.value;
@@ -31,7 +46,7 @@ impl XYModelCell {
             .sum()
     }
     fn create_gauss(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
-        let value = gauss(0.1, 10.0, &target_pos, &grid_pos);
+        let value = gauss(0.1, [10.0, 10.0], &target_pos, &grid_pos);
         self.value = modulo(self.value + value, 1.0);
     }
     fn create_defect(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
@@ -41,6 +56,10 @@ impl XYModelCell {
         let dist = (dx*dx + dy*dy) / scale.powi(2);
         let value = map_to_unit_interval(dy.atan2(dx), - PI, PI);
         self.value = modulo(self.value + value, 1.0);
+    }
+    fn thermal_update(&self, grid_view: &GridView<Self>) -> Self {
+        // need rng here
+        todo!()
     }
 }
 impl Cell for XYModelCell {

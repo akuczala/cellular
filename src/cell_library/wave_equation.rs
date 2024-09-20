@@ -6,7 +6,7 @@ use std::f32::consts::PI as PI;
 type Float = f32;
 
 const DT: Float = 0.01;
-const DAMPING: Float = 0.0;
+const DAMPING: Float = 0.01;
 const MASS: Float = 0.0;
 
 #[derive(Clone, Debug, Default)]
@@ -23,12 +23,20 @@ impl WaveCell {
             .sum()
     }
     fn speed(grid_pos: &GridPos) -> Float {
-        1.0
+        Self::single_slit_speed(grid_pos)
     }
+    fn constant_speed(grid_pos: &GridPos) -> Float {1.0}
     fn material_interface_speed(grid_pos: &GridPos) -> Float {
-        match grid_pos.y() {
+        match grid_pos.x() {
             y if y < 100 => 1.0,
-            y => 2.0
+            y => 0.0
+        }
+    }
+    fn single_slit_speed(grid_pos: &GridPos) -> Float {
+        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        match (x, y) {
+            (x,y) if (x > 95.0) & (x < 105.0) & ((y < 80.0) | (y > 120.0)) => 0.0,
+            _ => 1.0
         }
     }
     fn mode(nx: i32, ny: i32, grid_pos: GridPos) -> Self {
@@ -73,11 +81,12 @@ impl Cell for WaveCell {
     }
 
     fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
-        let sigma = 5.0;
+        let sigma_x: Float = 20.0;
+        let sigma_y: Float = 50.0;
         let wavelength = 5.0;
         let wave_vec = [1.0, 0.0];
-        let amplitude = 10.0 / (PI.sqrt() * sigma);
-        let gauss_value = gauss(amplitude, sigma, &target_pos, &grid_pos);
+        let amplitude = 10.0 / (PI * (sigma_x.powi(2) + sigma_y.powi(2))).sqrt();
+        let gauss_value = gauss(amplitude, [sigma_x, sigma_y], &target_pos, &grid_pos);
         let phase =  2.0 * PI *
             ((grid_pos.x() as Float) * wave_vec[0] + (grid_pos.y() as Float) * wave_vec[1]) / wavelength;
         self.value += gauss_value * phase.cos();

@@ -22,7 +22,7 @@ pub struct Grid<C: Cell> {
 }
 
 impl<'a, C: Cell> Grid<C> {
-    fn new_empty(width: usize, height: usize, boundary: Boundary<C>) -> Self {
+    pub fn new_empty(width: usize, height: usize, boundary: Boundary<C>) -> Self {
         assert!(width != 0 && height != 0);
         let size = width.checked_mul(height).expect("too big");
         Self {
@@ -65,7 +65,7 @@ impl<'a, C: Cell> Grid<C> {
     }
     // todo make private
     pub fn to_idx(&self, grid_pos: &GridPos) -> usize {
-        (grid_pos.x() as usize + grid_pos.y() as usize * self.width)
+        grid_pos.x() as usize + grid_pos.y() as usize * self.width
     }
     pub fn get_grid_pos_iter(&self) -> impl Iterator<Item=GridPos> {
         let (width, height) = (self.width as GridInt, self.height as GridInt);

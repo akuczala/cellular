@@ -3,27 +3,32 @@ use crate::grid::Grid;
 use crate::grid::grid_view::GridView;
 use crate::grid::grid_pos::{GridPos, GridInt};
 
+pub struct GenericSystemData(pub i32);
+
 pub struct GenericSystem<C: Cell> {
-    pub grid: Grid<C>
+    pub grid: Grid<C>,
 }
 impl<C: Cell> GenericSystem<C> {
-
+    pub fn new(grid: Grid<C>) -> Self {
+        Self{grid}
+    }
 
 }
 impl<C: Cell> System<C> for GenericSystem<C> {
     fn update(&mut self) {
         for grid_pos in self.get_grid().get_grid_pos_iter() {
-            let grid_view = GridView::new(grid_pos, &self.grid);
+            let grid_view = GridView::new(grid_pos, &self.get_grid());
             let cell = self.get_grid().get_cell_at(grid_pos);
             let next = self.update_cell(grid_view, cell);
             // Write into scratch_cells, since we're still reading from `self.cells`
-            self.grid.set_scatch_cell_at(grid_pos, next);
+            self.get_grid_mut().set_scatch_cell_at(grid_pos, next);
         }
-        self.grid.swap()
+        self.get_grid_mut().swap()
     }
     fn update_cell(&self, grid_view: GridView<C>, cell: &C) -> C {
         cell.update(grid_view)
     }
+
     fn get_grid(&self) -> &Grid<C> {
         &self.grid
     }
