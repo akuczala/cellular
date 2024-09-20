@@ -3,6 +3,7 @@ use crate::grid::grid_view::GridView;
 use crate::grid::Grid;
 use crate::util::{Color, RandomGenerator};
 
+// TODO: deprecate this oopy shit
 pub trait Cell: Default + Clone {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self;
     fn update(&self, grid_view: GridView<Self>) -> Self;
@@ -28,7 +29,7 @@ pub trait System<C: Cell> {
         let y0 = y0.max(0).min(self.get_grid().height as isize);
         for (x, y) in line_drawing::Bresenham::new((x0, y0), (x1, y1)) {
             let target_pos = GridPos::new(x as GridInt, y as GridInt);
-            if let Some(i) = self.get_grid().grid_idx(x, y) {
+            if let Some(_i) = self.get_grid().grid_idx(x, y) {
                 self.line_action(target_pos, alive)
             } else {
                 break;

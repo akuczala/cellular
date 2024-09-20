@@ -1,4 +1,4 @@
-use grid_view::GridView;
+pub use grid_view::GridView;
 
 use crate::cell::Cell;
 use crate::grid::boundary::{Boundary, BoundaryTrait};
@@ -65,7 +65,7 @@ impl<'a, C: Cell> Grid<C> {
     }
     // todo make private
     pub fn to_idx(&self, grid_pos: &GridPos) -> usize {
-        grid_pos.x() as usize + grid_pos.y() as usize * self.width
+        grid_pos.x as usize + grid_pos.y as usize * self.width
     }
     pub fn get_grid_pos_iter(&self) -> impl Iterator<Item = GridPos> {
         let (width, height) = (self.width as GridInt, self.height as GridInt);
@@ -82,7 +82,7 @@ impl<'a, C: Cell> Grid<C> {
     }
 
     pub fn raw_get_cell_at(&self, grid_pos: &GridPos) -> Option<&C> {
-        self.grid_idx(grid_pos.x() as isize, grid_pos.y() as isize)
+        self.grid_idx(grid_pos.x as isize, grid_pos.y as isize)
             .map(|idx| &self.cells[idx])
     }
     pub fn grid_idx(&self, x: isize, y: isize) -> Option<usize> {

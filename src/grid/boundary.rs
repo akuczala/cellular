@@ -14,7 +14,7 @@ pub struct PeriodicBoundary;
 impl<C: Cell> BoundaryTrait<C> for PeriodicBoundary {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C {
         let (width, height) = (grid.width as GridInt, grid.height as GridInt);
-        let new_grid_pos = GridPos::new(modulo(grid_pos.x(), width), modulo(grid_pos.y(), height));
+        let new_grid_pos = GridPos::new(modulo(grid_pos.x, width), modulo(grid_pos.y, height));
         grid.raw_get_cell_at(&new_grid_pos).unwrap()
     }
 }
@@ -39,8 +39,8 @@ pub struct FreeBoundary;
 impl<C: Cell> BoundaryTrait<C> for FreeBoundary {
     fn grid_map<'a>(&'a self, grid_pos: &GridPos, grid: &'a Grid<C>) -> &'a C {
         let new_grid_pos = GridPos::new(
-            grid_pos.x().clamp(0, (grid.width - 1) as GridInt),
-            grid_pos.y().clamp(0, (grid.height - 1) as GridInt),
+            grid_pos.x.clamp(0, (grid.width - 1) as GridInt),
+            grid_pos.y.clamp(0, (grid.height - 1) as GridInt),
         );
         grid.raw_get_cell_at(&new_grid_pos).unwrap()
     }

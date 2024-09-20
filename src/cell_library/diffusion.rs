@@ -34,7 +34,7 @@ impl DiffusionCell {
 }
 impl Cell for DiffusionCell {
     fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
-        let density = if grid_pos.x() > 50 {
+        let density = if grid_pos.x > 50 {
             randomize::f32_half_open_right(rng.next_u32()) * 1.0
         } else {
             0.0
@@ -53,14 +53,14 @@ impl Cell for DiffusionCell {
         let frac = map_to_unit_interval(self.density, MIN_VISIBLE_DENSITY, MAX_VISIBLE_DENSITY)
             .clamp(0.0, 1.0);
         let shade = (frac * (0xff as Density)) as u8;
-        let shade2 = ((-4.0 * frac.powi(2) + 4.0 * frac) * (0xff as Density)) as u8;
-        let shade3 = (frac.powi(3) * (0xff as Density)) as u8;
+        let _shade2 = ((-4.0 * frac.powi(2) + 4.0 * frac) * (0xff as Density)) as u8;
+        let _shade3 = (frac.powi(3) * (0xff as Density)) as u8;
         [shade, shade, shade, 0]
     }
 
-    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {}
+    fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {}
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, _alive: bool) {
         self.density += gauss(1.0, [20.0, 20.0], &target_pos, &grid_pos)
     }
 }

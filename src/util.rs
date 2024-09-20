@@ -1,8 +1,8 @@
 use crate::grid::grid_pos::{GridInt, GridPos};
-use crate::grid::grid_view::GridView;
-use num_complex::{Complex, Complex32};
+
+use num_complex::{Complex};
 use num_traits::{Float, Num, NumCast};
-use std::f32::consts::PI;
+
 use std::ops::Range;
 
 pub const NEAREST_NEIGHBORS: [[i32; 2]; 8] = [
@@ -75,10 +75,10 @@ pub fn map_from_unit_interval<I: Num + Copy>(x: I, min: I, max: I) -> I {
 
 pub fn gauss<I: Float>(amplitude: I, sigma: [I; 2], mean: &GridPos, grid_pos: &GridPos) -> I {
     let (x, y) = (
-        I::from(grid_pos.x()).unwrap(),
-        I::from(grid_pos.y()).unwrap(),
+        I::from(grid_pos.x).unwrap(),
+        I::from(grid_pos.y).unwrap(),
     );
-    let (mean_x, mean_y) = (I::from(mean.x()).unwrap(), I::from(mean.y()).unwrap());
+    let (mean_x, mean_y) = (I::from(mean.x).unwrap(), I::from(mean.y).unwrap());
     let (distx, disty) = ((x - mean_x) / sigma[0], (y - mean_y) / sigma[1]);
     let gauss_arg = -(distx.powi(2) + disty.powi(2));
     amplitude * gauss_arg.exp()

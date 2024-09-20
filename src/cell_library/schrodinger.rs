@@ -66,11 +66,11 @@ impl SchrodingerCell {
     fn potential(grid_pos: &GridPos) -> Float {
         Self::quartic_potential(grid_pos)
     }
-    fn free_potential(grid_pos: &GridPos) -> Float {
+    fn free_potential(_grid_pos: &GridPos) -> Float {
         0.0
     }
     fn step_potential(grid_pos: &GridPos) -> Float {
-        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let (x, _y) = (grid_pos.x as Float, grid_pos.y as Float);
         match x {
             x if x < 100.0 => 0.0,
             _ => 1.8,
@@ -78,30 +78,30 @@ impl SchrodingerCell {
     }
     fn harmonic_potential(grid_pos: &GridPos) -> Float {
         let radius = 100.0;
-        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let (x, y) = (grid_pos.x as Float, grid_pos.y as Float);
         let x = x - radius;
         let y = y - radius;
         (x * x + y * y) / (Float::powi(radius, 2)) * 4.0
     }
     fn coupled_harmonic_potential(grid_pos: &GridPos) -> Float {
         let radius = 100.0;
-        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let (x, y) = (grid_pos.x as Float, grid_pos.y as Float);
         let x = x - radius;
         let y = y - radius;
         (x * x + y * y + ((x + y).powi(2))) / (Float::powi(radius, 2)) * 2.0
     }
     fn quartic_potential(grid_pos: &GridPos) -> Float {
         let radius = 100.0;
-        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let (x, y) = (grid_pos.x as Float, grid_pos.y as Float);
         let (x, y) = ((x - radius) / radius, (y - radius) / radius);
-        let r_sq = (x * x + y * y);
+        let r_sq = x * x + y * y;
         (-r_sq + 2.0 * r_sq * r_sq) * 1.0
     }
     fn circular_well(grid_pos: &GridPos) -> Float {
         let radius = 100.0;
-        let (x, y) = (grid_pos.x() as Float, grid_pos.y() as Float);
+        let (x, y) = (grid_pos.x as Float, grid_pos.y as Float);
         let (x, y) = ((x - radius) / radius, (y - radius) / radius);
-        let r_sq = (x * x + y * y);
+        let r_sq = x * x + y * y;
         match r_sq {
             r_sq if r_sq > 0.5 => 4.0,
             _ => 0.0,
@@ -109,7 +109,7 @@ impl SchrodingerCell {
     }
 }
 impl Cell for SchrodingerCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+    fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         Self {
             real: 0.1
                 * map_from_unit_interval(randomize::f32_half_open_right(rng.next_u32()), -1.0, 1.0),
@@ -163,12 +163,12 @@ impl Cell for SchrodingerCell {
         let gauss_value = gauss(amplitude, [sigma, sigma], &target_pos, &grid_pos);
         let phase = 2.0
             * PI
-            * ((grid_pos.x() as Float) * wave_vec[0] + (grid_pos.y() as Float) * wave_vec[1])
+            * ((grid_pos.x as Float) * wave_vec[0] + (grid_pos.y as Float) * wave_vec[1])
             / wavelength;
         let phase = phase * 0.0;
         self.real += gauss_value * phase.cos();
         self.imag += gauss_value * phase.sin();
     }
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {}
+    fn line_action(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos, _alive: bool) {}
 }

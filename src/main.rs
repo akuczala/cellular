@@ -12,13 +12,13 @@ use winit_input_helper::WinitInputHelper;
 
 use crate::cell::System;
 use crate::cell_library::*;
-use crate::generic_system::{GenericSystem, GenericSystemData};
-use crate::grid::boundary::{Boundary, ConstantBoundary, FreeBoundary, PeriodicBoundary};
+use crate::generic_system::{GenericSystem};
+use crate::grid::boundary::{PeriodicBoundary};
 use crate::grid::Grid;
-use crate::phased_particle_system::PhasedParticleSystem;
+
 use crate::window::create_window;
-use num_complex::Complex32;
-use num_traits::real::Real;
+
+
 
 mod cell;
 mod cell_library;

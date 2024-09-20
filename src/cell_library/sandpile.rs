@@ -36,7 +36,7 @@ impl AbelianSandpileCell {
     }
 }
 impl Cell for AbelianSandpileCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+    fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let rand_int = RandRangeU32::new(0, 4);
         Self {
             height: rand_int.sample(rng) as i32,
@@ -57,10 +57,10 @@ impl Cell for AbelianSandpileCell {
     }
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
-        if (grid_pos.x() == target_pos.x()) & (grid_pos.y() == target_pos.y()) {
+        if (grid_pos.x == target_pos.x) & (grid_pos.y == target_pos.y) {
             self.height = 10_i32.pow(5) * 2;
         }
     }
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {}
+    fn line_action(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos, _alive: bool) {}
 }

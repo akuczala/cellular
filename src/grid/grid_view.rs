@@ -12,10 +12,10 @@ impl<'a, C: Cell> GridView<'a, C> {
     }
     pub fn get_cell_at_coord(&self, x: GridInt, y: GridInt) -> &C {
         self.grid
-            .get_cell_at(GridPos::new(x + self.origin.x(), y + self.origin.y()))
+            .get_cell_at(GridPos::new(x + self.origin.x, y + self.origin.y))
     }
     pub fn get_cell_at(&self, pos: GridPos) -> &C {
-        self.get_cell_at_coord(pos.x(), pos.y())
+        self.get_cell_at_coord(pos.x, pos.y)
     }
     pub fn grid_width(&self) -> GridInt {
         self.grid.width as GridInt

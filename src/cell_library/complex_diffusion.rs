@@ -5,9 +5,9 @@ use crate::util::{
     complex_to_hue, gauss, stencil_coords, Color, RandomGenerator, NEAREST_NEIGHBORS,
     N_NEAREST_NEIGHBORS, SECOND_ORDER_CENTRAL,
 };
-use num_complex::{Complex32, Complex64};
+use num_complex::{Complex64};
 use palette::{Hsv, LinSrgb, Pixel};
-use std::f32::consts::PI;
+
 
 type Density = Complex64;
 type Float = f64;
@@ -39,16 +39,16 @@ impl ComplexDiffusionCell {
 }
 
 impl Cell for ComplexDiffusionCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
-        let radius = if (grid_pos.x() > 50) & (grid_pos.y() > 50) {
+    fn random(_rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+        let _radius = if (grid_pos.x > 50) & (grid_pos.y > 50) {
             //randomize::f32_half_open_right(rng.next_u32()) * 1.0
             1.0
         } else {
             0.0
         };
-        let radius = Float::sin(2.0 * std::f64::consts::PI * (grid_pos.x() as Float) / 100.0);
+        let radius = Float::sin(2.0 * std::f64::consts::PI * (grid_pos.x as Float) / 100.0);
         let radius =
-            radius * Float::sin(2.0 * std::f64::consts::PI * (grid_pos.y() as Float) / 100.0);
+            radius * Float::sin(2.0 * std::f64::consts::PI * (grid_pos.y as Float) / 100.0);
         //let theta = randomize::f32_half_open_right(rng.next_u32()) * 2.0 * PI;
         let theta = 0.0;
         Self {
@@ -78,7 +78,7 @@ impl Cell for ComplexDiffusionCell {
             gauss(1.0, [20.0, 20.0], &target_pos, &grid_pos) * Density::new(MAX_ABS, 0.0);
     }
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {}
+    fn line_action(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos, _alive: bool) {}
 }
 
 #[test]

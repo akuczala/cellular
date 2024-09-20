@@ -15,7 +15,7 @@ struct ParticleCounter {
 impl ParticleCounter {
     pub fn randomize_n(n: ParticleCount, rng: &mut RandomGenerator) -> ParticleCounter {
         let mut counts: [ParticleCount; 4] = [0, 0, 0, 0];
-        let mut random_slot = randomize::RandRangeU32::new(0, 3);
+        let random_slot = randomize::RandRangeU32::new(0, 3);
         for _ in 0..n {
             counts[random_slot.sample(rng) as usize] += 1;
         }
@@ -44,7 +44,7 @@ pub struct ParticleDiffusionCell {
 }
 impl Default for ParticleDiffusionCell {
     fn default() -> Self {
-        let mut rng: randomize::PCG32 = generate_seed().into();
+        let rng: randomize::PCG32 = generate_seed().into();
         Self {
             particles: ParticleCounter::default(),
             rng,
@@ -60,7 +60,7 @@ impl ParticleDiffusionCell {
     }
 }
 impl Cell for ParticleDiffusionCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+    fn random(_rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let mut rng: randomize::PCG32 = generate_seed().into();
         let n = randomize::RandRangeU32::new(0, 5).sample(&mut rng);
         let particles = ParticleCounter::randomize_n(n, &mut rng);
@@ -80,9 +80,9 @@ impl Cell for ParticleDiffusionCell {
         [shade, shade, shade, 0]
     }
 
-    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {}
+    fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {}
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, _alive: bool) {
         let mut rng: randomize::PCG32 = generate_seed().into();
         let gauss_value = gauss(10.0, [20.0, 20.0], &target_pos, &grid_pos);
         self.particles = ParticleCounter::randomize_n(gauss_value as ParticleCount, &mut rng);

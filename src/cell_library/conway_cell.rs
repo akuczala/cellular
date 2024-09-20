@@ -44,7 +44,7 @@ impl ConwayCell {
     }
 }
 impl Cell for ConwayCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+    fn random(rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         let alive = randomize::f32_half_open_right(rng.next_u32()) > INITIAL_FILL;
         ConwayCell::new(alive)
     }
@@ -67,12 +67,12 @@ impl Cell for ConwayCell {
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
         let was_alive = self.alive;
-        if (target_pos.x() == grid_pos.x()) & (target_pos.y() == grid_pos.y()) {
+        if (target_pos.x == grid_pos.x) & (target_pos.y == grid_pos.y) {
             self.set_alive(!was_alive);
         }
     }
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+    fn line_action(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos, alive: bool) {
         self.set_alive(alive);
     }
 }

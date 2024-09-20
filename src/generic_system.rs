@@ -38,7 +38,7 @@ impl<C: Cell> System<C> for GenericSystem<C> {
 
     fn toggle(&mut self, x: isize, y: isize) -> bool {
         match self.grid.grid_idx(x, y) {
-            Some(i) => {
+            Some(_i) => {
                 let target_pos = GridPos::new(x as GridInt, y as GridInt);
                 for grid_pos in self.grid.get_grid_pos_iter() {
                     let idx = self.grid.to_idx(&grid_pos);

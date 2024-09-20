@@ -8,7 +8,7 @@ use crate::util::{
 use num_complex::Complex32;
 use palette::{Hsv, LinSrgb, Pixel};
 use std::collections::HashMap;
-use std::time::Duration;
+
 
 #[derive(PartialEq, Clone, Copy)]
 enum Direction {
@@ -37,8 +37,8 @@ impl Particle {
             _ => panic!("Should never get here"),
         };
         let pos = GridPos::new(
-            modulo(self.pos.x() + dx, grid.width as GridInt),
-            self.pos.y(),
+            modulo(self.pos.x + dx, grid.width as GridInt),
+            self.pos.y,
         );
         let phase = match direction {
             x if x == self.last_direction => self.phase,
@@ -52,17 +52,17 @@ impl Particle {
     }
     fn old_update(&self, rng: &mut RandomGenerator, grid: &Grid<PhasedParticleCell>) -> Self {
         let random_int = randomize::RandRangeU32::new(0, 2);
-        let pos = GridPos::new(
+        let _pos = GridPos::new(
             modulo(
-                self.pos.x() + random_int.sample(rng) as GridInt - 1,
+                self.pos.x + random_int.sample(rng) as GridInt - 1,
                 grid.width as GridInt,
             ),
             modulo(
-                self.pos.y() + random_int.sample(rng) as GridInt - 1,
+                self.pos.y + random_int.sample(rng) as GridInt - 1,
                 grid.height as GridInt,
             ),
         );
-        let phase = self.phase * Complex32::i();
+        let _phase = self.phase * Complex32::i();
         unimplemented!()
         //Self{phase, pos}
     }
@@ -139,8 +139,8 @@ impl System<PhasedParticleCell> for PhasedParticleSystem {
 
     fn update_cell(
         &self,
-        grid_view: GridView<PhasedParticleCell>,
-        cell: &PhasedParticleCell,
+        _grid_view: GridView<PhasedParticleCell>,
+        _cell: &PhasedParticleCell,
     ) -> PhasedParticleCell {
         todo!()
     }
@@ -166,7 +166,7 @@ impl System<PhasedParticleCell> for PhasedParticleSystem {
         true
     }
 
-    fn line_action(&mut self, target_pos: GridPos, alive: bool) {}
+    fn line_action(&mut self, _target_pos: GridPos, _alive: bool) {}
 }
 
 #[derive(Default, Clone)]
@@ -190,22 +190,22 @@ impl PhasedParticleCell {
     }
 }
 impl Cell for PhasedParticleCell {
-    fn random(rng: &mut RandomGenerator, grid_pos: GridPos) -> Self {
+    fn random(_rng: &mut RandomGenerator, _grid_pos: GridPos) -> Self {
         unimplemented!()
     }
 
-    fn update(&self, grid_view: GridView<Self>) -> Self {
+    fn update(&self, _grid_view: GridView<Self>) -> Self {
         unimplemented!()
     }
     fn draw(&self) -> Color {
         self.draw_complex()
     }
 
-    fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
+    fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {
         todo!()
     }
 
-    fn line_action(&mut self, target_pos: &GridPos, grid_pos: &GridPos, alive: bool) {
+    fn line_action(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos, _alive: bool) {
         todo!()
     }
 }
