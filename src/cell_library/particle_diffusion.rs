@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{gauss, generate_seed, map_to_unit_interval, RandomGenerator};
@@ -67,21 +67,20 @@ impl Randomize for ParticleDiffusionCell {
         Self { particles, rng }
     }
 }
+impl HasColor for ParticleDiffusionCell {
+    fn draw(&self) -> [u8; 4] {
+        let frac = map_to_unit_interval(self.particles.total() as f32, 0.0, 10.0).clamp(0.0, 1.0);
+        let shade = (frac * (0xff as f32)) as u8;
+        [shade, shade, shade, 0]
+    }
+}
 
 impl Cell for ParticleDiffusionCell {
-    
-
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let n = Self::get_n_incoming(grid_view);
         let mut rng = self.rng.clone();
         let particles = ParticleCounter::randomize_n(n, &mut rng);
         Self { particles, rng }
-    }
-
-    fn draw(&self) -> [u8; 4] {
-        let frac = map_to_unit_interval(self.particles.total() as f32, 0.0, 10.0).clamp(0.0, 1.0);
-        let shade = (frac * (0xff as f32)) as u8;
-        [shade, shade, shade, 0]
     }
 
     fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {}

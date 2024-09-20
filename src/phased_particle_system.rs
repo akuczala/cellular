@@ -1,4 +1,4 @@
-use crate::cell::{Cell, System};
+use crate::cell::{Cell, HasColor, System};
 use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::grid_view::GridView;
 use crate::grid::Grid;
@@ -8,7 +8,6 @@ use crate::util::{
 use num_complex::Complex32;
 use palette::{Hsv, LinSrgb, Pixel};
 use std::collections::HashMap;
-
 
 #[derive(PartialEq, Clone, Copy)]
 enum Direction {
@@ -36,10 +35,7 @@ impl Particle {
             1 => Direction::Right,
             _ => panic!("Should never get here"),
         };
-        let pos = GridPos::new(
-            modulo(self.pos.x + dx, grid.width as GridInt),
-            self.pos.y,
-        );
+        let pos = GridPos::new(modulo(self.pos.x + dx, grid.width as GridInt), self.pos.y);
         let phase = match direction {
             x if x == self.last_direction => self.phase,
             _ => self.phase * Complex32::i(),
@@ -123,18 +119,18 @@ impl System<PhasedParticleCell> for PhasedParticleSystem {
             cells.insert(pos, new_cell);
         }
         //clear all cells
-        for grid_pos in self.get_grid().get_grid_pos_iter() {
-            self.get_grid_mut()
+        for grid_pos in self.grid.get_grid_pos_iter() {
+            self.grid
                 .set_scatch_cell_at(grid_pos, PhasedParticleCell::default());
         }
         for (pos, cell) in cells.drain() {
             let cell = PhasedParticleCell {
                 phase: cell.phase / (self.particles.len() as f32 / 1000.0),
             };
-            self.get_grid_mut().set_scatch_cell_at(pos, cell)
+            self.grid.set_scatch_cell_at(pos, cell)
         }
 
-        self.get_grid_mut().swap()
+        self.grid.swap()
     }
 
     fn update_cell(
@@ -143,14 +139,6 @@ impl System<PhasedParticleCell> for PhasedParticleSystem {
         _cell: &PhasedParticleCell,
     ) -> PhasedParticleCell {
         todo!()
-    }
-
-    fn get_grid(&self) -> &Grid<PhasedParticleCell> {
-        &self.grid
-    }
-
-    fn get_grid_mut(&mut self) -> &mut Grid<PhasedParticleCell> {
-        &mut self.grid
     }
 
     fn toggle(&mut self, x: isize, y: isize) -> bool {
@@ -189,13 +177,14 @@ impl PhasedParticleCell {
         [pos, neg, neg, 0]
     }
 }
-impl Cell for PhasedParticleCell {
-
-    fn update(&self, _grid_view: GridView<Self>) -> Self {
-        unimplemented!()
-    }
+impl HasColor for PhasedParticleCell {
     fn draw(&self) -> Color {
         self.draw_complex()
+    }
+}
+impl Cell for PhasedParticleCell {
+    fn update(&self, _grid_view: GridView<Self>) -> Self {
+        unimplemented!()
     }
 
     fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {

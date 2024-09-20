@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::NEAREST_NEIGHBORS;
@@ -49,6 +49,15 @@ impl Randomize for ConwayCell {
         ConwayCell::new(alive)
     }
 }
+impl HasColor for ConwayCell {
+    fn draw(&self) -> Color {
+        if self.alive {
+            [0, 0xff, 0xff, 0xff]
+        } else {
+            [0, 0, self.heat, 0xff]
+        }
+    }
+}
 impl Cell for ConwayCell {
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let n = ConwayCell::count_neibs(grid_view);
@@ -58,13 +67,6 @@ impl Cell for ConwayCell {
             BIRTH_RULE[n]
         };
         self.next_state(next_alive)
-    }
-    fn draw(&self) -> Color {
-        if self.alive {
-            [0, 0xff, 0xff, 0xff]
-        } else {
-            [0, 0, self.heat, 0xff]
-        }
     }
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {

@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -42,16 +42,7 @@ impl Randomize for DiffusionCell {
         Self { density }
     }
 }
-impl Cell for DiffusionCell {
-   
-
-    fn update(&self, grid_view: GridView<Self>) -> Self {
-        let new_density: Density = Self::laplace(grid_view) * DIFFUSION_CONSTANT + self.density;
-        Self {
-            density: new_density,
-        }
-    }
-
+impl HasColor for DiffusionCell {
     fn draw(&self) -> Color {
         let frac = map_to_unit_interval(self.density, MIN_VISIBLE_DENSITY, MAX_VISIBLE_DENSITY)
             .clamp(0.0, 1.0);
@@ -59,6 +50,14 @@ impl Cell for DiffusionCell {
         let _shade2 = ((-4.0 * frac.powi(2) + 4.0 * frac) * (0xff as Density)) as u8;
         let _shade3 = (frac.powi(3) * (0xff as Density)) as u8;
         [shade, shade, shade, 0]
+    }
+}
+impl Cell for DiffusionCell {
+    fn update(&self, grid_view: GridView<Self>) -> Self {
+        let new_density: Density = Self::laplace(grid_view) * DIFFUSION_CONSTANT + self.density;
+        Self {
+            density: new_density,
+        }
     }
 
     fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {}

@@ -12,20 +12,18 @@ use winit_input_helper::WinitInputHelper;
 
 use crate::cell::System;
 use crate::cell_library::*;
-use crate::generic_system::{GenericSystem};
-use crate::grid::boundary::{PeriodicBoundary};
+use crate::generic_system::GenericSystem;
+use crate::grid::boundary::PeriodicBoundary;
 use crate::grid::Grid;
 
 use crate::window::create_window;
-
-
 
 mod cell;
 mod cell_library;
 mod generic_system;
 mod grid;
 mod input;
-mod phased_particle_system;
+//mod phased_particle_system;
 mod util;
 mod window;
 
@@ -84,7 +82,7 @@ fn main() -> Result<(), Error> {
             if input_result.randomize {
                 system.grid.randomize();
             }
-            
+
             if input_result.clear {
                 system.grid.clear();
             }
@@ -138,13 +136,13 @@ fn main() -> Result<(), Error> {
                 // in the middle of drawing, keep going.
                 if release || held {
                     debug!("Draw line of {:?}", draw_alive);
-                    system.set_line(
-                        mouse_prev_cell.0,
-                        mouse_prev_cell.1,
-                        mouse_cell.0,
-                        mouse_cell.1,
-                        draw_alive,
-                    );
+                    // system.set_line(
+                    //     mouse_prev_cell.0,
+                    //     mouse_prev_cell.1,
+                    //     mouse_cell.0,
+                    //     mouse_cell.1,
+                    //     draw_alive,
+                    // );
                 }
                 // If they let go or are otherwise not clicking anymore, stop drawing.
                 if release || !held {

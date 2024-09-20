@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -119,9 +119,19 @@ impl Randomize for SchrodingerCell {
         }
     }
 }
+impl HasColor for SchrodingerCell {
+    fn draw(&self) -> [u8; 4] {
+        //note: to display conserved probability you need to track and mix more timestamps
+        let z = Complex32::new(self.real, self.imag);
+        let hue = complex_to_hue(z);
+        let value = z.norm();
+        let rgb: [u8; 3] = LinSrgb::from(Hsv::new(hue, 1.0, value))
+            .into_format()
+            .into_raw();
+        [rgb[0], rgb[1], rgb[2], 0]
+    }
+}
 impl Cell for SchrodingerCell {
-    
-
     fn update(&self, grid_view: GridView<Self>) -> Self {
         match self.update_phase {
             CellDataLabel::Real => {
@@ -147,27 +157,15 @@ impl Cell for SchrodingerCell {
         }
     }
 
-    fn draw(&self) -> [u8; 4] {
-        //note: to display conserved probability you need to track and mix more timestamps
-        let z = Complex32::new(self.real, self.imag);
-        let hue = complex_to_hue(z);
-        let value = z.norm();
-        let rgb: [u8; 3] = LinSrgb::from(Hsv::new(hue, 1.0, value))
-            .into_format()
-            .into_raw();
-        [rgb[0], rgb[1], rgb[2], 0]
-    }
-
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
         let sigma = 10.0;
         let wavelength = 20.0;
         let wave_vec = [1.0, 0.0];
         let amplitude = 20.0 / (PI.sqrt() * sigma);
         let gauss_value = gauss(amplitude, [sigma, sigma], &target_pos, &grid_pos);
-        let phase = 2.0
-            * PI
-            * ((grid_pos.x as Float) * wave_vec[0] + (grid_pos.y as Float) * wave_vec[1])
-            / wavelength;
+        let phase =
+            2.0 * PI * ((grid_pos.x as Float) * wave_vec[0] + (grid_pos.y as Float) * wave_vec[1])
+                / wavelength;
         let phase = phase * 0.0;
         self.real += gauss_value * phase.cos();
         self.imag += gauss_value * phase.sin();

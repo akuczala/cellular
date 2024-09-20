@@ -1,13 +1,12 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
     complex_to_hue, gauss, stencil_coords, Color, RandomGenerator, NEAREST_NEIGHBORS,
     N_NEAREST_NEIGHBORS, SECOND_ORDER_CENTRAL,
 };
-use num_complex::{Complex64};
+use num_complex::Complex64;
 use palette::{Hsv, LinSrgb, Pixel};
-
 
 type Density = Complex64;
 type Float = f64;
@@ -55,16 +54,7 @@ impl Randomize for ComplexDiffusionCell {
         }
     }
 }
-impl Cell for ComplexDiffusionCell {
-
-    fn update(&self, grid_view: GridView<Self>) -> Self {
-        let new_density: Density =
-            Self::laplace(grid_view) * Self::diffusion_constant() + self.density;
-        Self {
-            density: new_density,
-        }
-    }
-
+impl HasColor for ComplexDiffusionCell {
     fn draw(&self) -> Color {
         let hue = complex_to_hue(self.density);
         let value = self.density.norm();
@@ -72,6 +62,15 @@ impl Cell for ComplexDiffusionCell {
             .into_format()
             .into_raw();
         [rgb[0], rgb[1], rgb[2], 0]
+    }
+}
+impl Cell for ComplexDiffusionCell {
+    fn update(&self, grid_view: GridView<Self>) -> Self {
+        let new_density: Density =
+            Self::laplace(grid_view) * Self::diffusion_constant() + self.density;
+        Self {
+            density: new_density,
+        }
     }
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {
@@ -84,6 +83,7 @@ impl Cell for ComplexDiffusionCell {
 
 #[test]
 fn test_draw() {
+    
     let cell = ComplexDiffusionCell {
         density: Density::new(-1.0, 0.0),
     };
@@ -93,7 +93,7 @@ fn test_draw() {
     assert_eq!(value, 1.0);
     let hsv = Hsv::new(hue, 1.0, value);
     println!("{:?}", hsv);
-    println!("{:?}", Rgb::from(hsv));
+    //println!("{:?}", Rgb::from(hsv));
     assert_eq!(cell.draw(), [0, 0xff, 0xff, 0]);
 
     let cell = ComplexDiffusionCell {
@@ -103,6 +103,6 @@ fn test_draw() {
     let value = cell.density.norm();
     assert_eq!(hue, 0.75);
     assert_eq!(value, 1.0);
-    println!("{:?}", Rgb::from(Hsv::new(hue, 1.0, value)));
+    //println!("{:?}", Rgb::from(Hsv::new(hue, 1.0, value)));
     assert_eq!(cell.draw(), [0, 0xff, 0xff, 0]);
 }

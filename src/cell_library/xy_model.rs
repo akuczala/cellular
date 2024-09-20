@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::{GridInt, GridPos};
 use crate::grid::grid_view::GridView;
 use crate::util::{gauss, map_to_unit_interval, modulo, RandomGenerator};
@@ -75,19 +75,18 @@ impl Randomize for XYModelCell {
         }
     }
 }
-impl Cell for XYModelCell {
-    
-
-    fn update(&self, grid_view: GridView<Self>) -> Self {
-        let velocity = self.velocity * (1.0 - DAMPING * DT) + DT * self.get_force(&grid_view);
-        let value = modulo(self.value + DT * velocity, 1.0);
-        Self { value, velocity }
-    }
-
+impl HasColor for XYModelCell {
     fn draw(&self) -> [u8; 4] {
         let hue = self.value * 360.0;
         let rgb: [u8; 3] = Srgb::from(Hsv::new(hue, 1.0, 1.0)).into_format().into_raw();
         [rgb[0], rgb[1], rgb[2], 0]
+    }
+}
+impl Cell for XYModelCell {
+    fn update(&self, grid_view: GridView<Self>) -> Self {
+        let velocity = self.velocity * (1.0 - DAMPING * DT) + DT * self.get_force(&grid_view);
+        let value = modulo(self.value + DT * velocity, 1.0);
+        Self { value, velocity }
     }
 
     fn toggle(&mut self, target_pos: &GridPos, grid_pos: &GridPos) {

@@ -1,4 +1,4 @@
-use crate::cell::{Cell, Randomize};
+use crate::cell::{Cell, HasColor, Randomize};
 use crate::grid::grid_pos::GridPos;
 use crate::grid::grid_view::GridView;
 use crate::util::{
@@ -64,22 +64,21 @@ impl Randomize for WaveCell {
         //Self::mode(5, 3, grid_pos)
     }
 }
+impl HasColor for WaveCell {
+    fn draw(&self) -> [u8; 4] {
+        let frac = map_to_unit_interval(self.value, 0.0, 1.0).clamp(-1.0, 1.0);
+        let pos = (frac.clamp(0.0, 1.0) * (0xff as Float)) as u8;
+        let neg = (-1.0 * frac.clamp(-1.0, 0.0) * (0xff as Float)) as u8;
+        [pos, neg, neg, 0]
+    }
+}
 impl Cell for WaveCell {
-    
-
     fn update(&self, grid_view: GridView<Self>) -> Self {
         let velocity = self.velocity * (1.0 - DAMPING * DT)
             + Self::speed(&grid_view.origin) * Self::laplace(grid_view) * DT
             - self.value * MASS * DT;
         let value = self.value + velocity * DT;
         Self { value, velocity }
-    }
-
-    fn draw(&self) -> [u8; 4] {
-        let frac = map_to_unit_interval(self.value, 0.0, 1.0).clamp(-1.0, 1.0);
-        let pos = (frac.clamp(0.0, 1.0) * (0xff as Float)) as u8;
-        let neg = (-1.0 * frac.clamp(-1.0, 0.0) * (0xff as Float)) as u8;
-        [pos, neg, neg, 0]
     }
 
     fn toggle(&mut self, _target_pos: &GridPos, _grid_pos: &GridPos) {}
@@ -91,10 +90,9 @@ impl Cell for WaveCell {
         let wave_vec = [1.0, 0.0];
         let amplitude = 10.0 / (PI * (sigma_x.powi(2) + sigma_y.powi(2))).sqrt();
         let gauss_value = gauss(amplitude, [sigma_x, sigma_y], &target_pos, &grid_pos);
-        let phase = 2.0
-            * PI
-            * ((grid_pos.x as Float) * wave_vec[0] + (grid_pos.y as Float) * wave_vec[1])
-            / wavelength;
+        let phase =
+            2.0 * PI * ((grid_pos.x as Float) * wave_vec[0] + (grid_pos.y as Float) * wave_vec[1])
+                / wavelength;
         self.value += gauss_value * phase.cos();
         self.velocity += 1.0 * gauss_value * phase.sin();
     }
