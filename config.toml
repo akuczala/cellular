@@ -1,4 +1,5 @@
-grid_width = 20
-grid_height = 20
-per_frame_updates = 1
-system = "Conway"
+grid_width = 200
+grid_height = 200
+per_frame_updates = 5
+system = "XYModel"
+boundary = "Periodic"

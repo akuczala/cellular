@@ -3,11 +3,13 @@
 #![deny(clippy::all)]
 #![forbid(unsafe_code)]
 
-use config::read_config;
+use cell::{Cell, HasColor, Randomize};
+use config::{read_config, BoundaryConfig, Config, SystemConfig};
+use grid::boundary::{Boundary, ConstantBoundary, FreeBoundary};
 use grid::grid_view::GridView;
 use log::{debug, error};
 use pixels::{Error, Pixels, SurfaceTexture};
-use winit::event::{Event, VirtualKeyCode};
+use winit::event::{Event, KeyboardInput, VirtualKeyCode, WindowEvent};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit_input_helper::WinitInputHelper;
 
@@ -31,6 +33,21 @@ mod window;
 
 fn main() -> Result<(), Error> {
     let config = read_config();
+    match config.system {
+        SystemConfig::Conway => run_with_cell::<ConwayCell>(config),
+        SystemConfig::XYModel => run_with_cell::<XYModelCell>(config),
+        SystemConfig::Wave => run_with_cell::<WaveCell>(config),
+        SystemConfig::Sandpile => run_with_cell::<AbelianSandpileCell>(config),
+        SystemConfig::Schrodinger => run_with_cell::<SchrodingerCell>(config),
+    }
+}
+
+fn run_with_cell<T: Clone + Default + HasColor + Randomize + Cell + 'static>(
+    config: Config,
+) -> Result<(), Error>
+where
+    GenericSystem<T>: SystemInputs,
+{
     env_logger::init();
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -43,10 +60,14 @@ fn main() -> Result<(), Error> {
 
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
 
-    let mut system = GenericSystem::<XYModelCell>::new(Grid::new_random(
+    let mut system = GenericSystem::<T>::new(Grid::new_random(
         config.grid_width as usize,
         config.grid_height as usize,
-        PeriodicBoundary.into(),
+        match config.boundary {
+            BoundaryConfig::Periodic => PeriodicBoundary.into(),
+            BoundaryConfig::Constant => ConstantBoundary::empty().into(),
+            BoundaryConfig::Free => FreeBoundary.into(),
+        },
     ));
     let mut pixels = Pixels::new(config.grid_width, config.grid_height, surface_texture)?;
     let mut paused = false;
@@ -64,6 +85,11 @@ fn main() -> Result<(), Error> {
             {
                 *control_flow = ControlFlow::Exit;
                 return;
+            }
+        }
+        if let Event::WindowEvent { event, .. } = &event {
+            if let WindowEvent::KeyboardInput { input, .. } = event {
+                input.virtual_keycode.map(|k| system.key_response(k));
             }
         }
 
@@ -87,20 +113,6 @@ fn main() -> Result<(), Error> {
 
             if input_result.clear {
                 system.grid.clear();
-            }
-
-            if input.key_pressed(VirtualKeyCode::E) {
-                let total_energy: f32 = system
-                    .grid
-                    .get_grid_pos_iter()
-                    .map(|p| {
-                        system
-                            .grid
-                            .get_cell_at(p)
-                            .get_energy(&GridView::new(p, &system.grid))
-                    })
-                    .sum();
-                println!("Total energy {:?}", total_energy)
             }
             // Handle mouse. This is a bit involved since support some simple
             // line drawing (mostly because it makes nice looking patterns).
@@ -169,3 +181,31 @@ fn main() -> Result<(), Error> {
         }
     });
 }
+
+pub trait SystemInputs {
+    fn key_response(&self, vkc: VirtualKeyCode) {}
+}
+impl SystemInputs for GenericSystem<XYModelCell> {
+    fn key_response(&self, vkc: VirtualKeyCode) {
+        match vkc {
+            VirtualKeyCode::E => {
+                let total_energy: f32 = self
+                    .grid
+                    .get_grid_pos_iter()
+                    .map(|p| {
+                        self.grid
+                            .get_cell_at(p)
+                            .get_energy(&GridView::new(p, &self.grid))
+                    })
+                    .sum();
+                println!("Total energy {:?}", total_energy)
+            }
+            _ => (),
+        }
+    }
+}
+
+impl SystemInputs for GenericSystem<ConwayCell> {}
+impl SystemInputs for GenericSystem<WaveCell> {}
+impl SystemInputs for GenericSystem<AbelianSandpileCell> {}
+impl SystemInputs for GenericSystem<SchrodingerCell> {}

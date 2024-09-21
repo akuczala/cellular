@@ -7,6 +7,15 @@ pub enum SystemConfig {
     Conway,
     XYModel,
     Wave,
+    Sandpile,
+    Schrodinger,
+}
+
+#[derive(Deserialize)]
+pub enum BoundaryConfig {
+    Periodic,
+    Constant,
+    Free,
 }
 
 #[derive(Deserialize)]
@@ -15,6 +24,7 @@ pub struct Config {
     pub grid_height: u32,
     pub per_frame_updates: u32,
     pub system: SystemConfig,
+    pub boundary: BoundaryConfig,
 }
 impl Default for Config {
     fn default() -> Self {
@@ -23,6 +33,7 @@ impl Default for Config {
             grid_height: 200,
             per_frame_updates: 1,
             system: SystemConfig::XYModel,
+            boundary: BoundaryConfig::Periodic,
         }
     }
 }

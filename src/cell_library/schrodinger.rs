@@ -64,7 +64,7 @@ impl SchrodingerCell {
         }
     }
     fn potential(grid_pos: &GridPos) -> Float {
-        Self::quartic_potential(grid_pos)
+        Self::harmonic_potential(grid_pos)
     }
     fn free_potential(_grid_pos: &GridPos) -> Float {
         0.0

@@ -45,7 +45,7 @@ impl Randomize for AbelianSandpileCell {
 }
 impl HasColor for AbelianSandpileCell {
     fn draw(&self) -> Color {
-        self.grayscale()
+        self.colormap_1()
     }
 }
 impl Cell for AbelianSandpileCell {
